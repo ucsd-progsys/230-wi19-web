@@ -1,5 +1,6 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
+
 import Data.Monoid (mappend)
 import Hakyll
 import Text.Pandoc
@@ -11,8 +12,6 @@ crunchWithCtx ctx = do
             >>= loadAndApplyTemplate "templates/default.html" ctx 
             >>= relativizeUrls
 
-
-
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyll $ do
@@ -22,39 +21,6 @@ main = hakyll $ do
   match "lectures/*"    $ crunchWithCtx postCtx 
   match "assignments/*" $ crunchWithCtx postCtx 
   match "templates/*"   $ compile templateCompiler
- 
- 
-  {-
-
-    create ["archive.html"] $ do
-        route idRoute
-        compile $ do
-            posts <- recentFirst =<< loadAll "posts/*"
-            let archiveCtx =
-                    listField "posts" postCtx (return posts) `mappend`
-                    constField "title" "Archives"            `mappend`
-                    siteCtx
-
-            makeItem ""
-                >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
-                >>= loadAndApplyTemplate "templates/default.html" archiveCtx
-                >>= relativizeUrls
-
-    match "orig-index.html" $ do
-        route idRoute
-        compile $ do
-            posts <- recentFirst =<< loadAll "posts/*"
-            let indexCtx =
-                    listField "posts" postCtx (return posts) `mappend`
-                    constField "title" "Home"                `mappend`
-                    siteCtx
-
-            getResourceBody
-                >>= applyAsTemplate indexCtx
-                >>= loadAndApplyTemplate "templates/default.html" indexCtx
-                >>= relativizeUrls
-    -} 
-
 
 --------------------------------------------------------------------------------
 postCtx :: Context String
@@ -65,16 +31,15 @@ postCtx =
 
 siteCtx :: Context String
 siteCtx =
-    constField "baseurl"            "https://ucsd-progsys.github.io/131-web"     `mappend`
-    constField "site_name"          "cse131"                    `mappend`
-    constField "site_description"   "UCSD CSE 131"              `mappend`
-    -- constField "instagram_username" "ranjitjhala"               `mappend`
-    constField "site_username"      "Ranjit Jhala"              `mappend`
-    constField "twitter_username"   "ranjitjhala"               `mappend`
-    constField "github_username"    "ucsd-progsys/131-web"      `mappend`
-    constField "google_username"    "rjhala@eng.ucsd.edu"       `mappend`
-    constField "google_userid"      "u/0/106612421534244742464" `mappend`
-    constField "piazza_classid"     "ucsd/fall2018/cse131/home" `mappend`
+    constField "baseurl"            "https://ucsd-progsys.github.io/230-wi19-web"     `mappend`
+    constField "site_name"          "cse230"                      `mappend`
+    constField "site_description"   "UCSD CSE 230"                `mappend`
+    constField "site_username"      "Ranjit Jhala"                `mappend`
+    constField "twitter_username"   "ranjitjhala"                 `mappend`
+    constField "github_username"    "ucsd-progsys/230-wi19-web"   `mappend`
+    constField "google_username"    "rjhala@eng.ucsd.edu"         `mappend`
+    constField "google_userid"      "u/0/106612421534244742464"   `mappend`
+    constField "piazza_classid"     "class/jqk23zupq7a62c"        `mappend`
     defaultContext
 
 tops =

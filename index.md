@@ -1,29 +1,26 @@
 ---
-title: Compilers
-headerImg: Eiffel.png
+title: Proofs and Programs 
 ---
 
-CSE 131 is an introduction to modern Compiler Design.
-According to the venerable [Wikipedia](https://en.wikipedia.org/wiki/Compiler)
+CSE 230 is an introduction to the Formal Semantics of Programming Languages.
 
-> A compiler is a computer program (or a set of programs)
-> that transforms source code written in a programming
-> language (the source language) into another computer
-> language (the target language), with the latter often
-> having a binary form known as object code.[1]
->  The most common reason for converting source code is
-> to create an executable program.
+## Course Description
 
-In the course of the next ten weeks, we will look at
-how to convert programs written in a high-level language
-think ML from [CSE 130](http://ucsd-progsys.github.io/cse130/),
-all the way down to bare metal, i.e. x86 assembly.
-While doing so, we will *also* learn important lessons about
-Software Engineering and Testing. As an added bonus, CSE 131
-will reinforce and tie together concepts learnt in
-Computer Organization and Programming Languages, in
-particular showing the connections between assembly (x86),
-systems (C) and functional (Haskell) programming.
+Unlike most engineering artifacts, Programming Languages and Programs are
+mathematical objects whose properties can be formalized. The goal of this
+course is to introduce students to fundamental intellectual and mechanical 
+tools required to rigorously analyze Languages and Programs and to expose 
+them to recent developments in and applications of these techniques. We shall study
+operational and axiomatic semantics, two different ways of precisely capturing
+the meaning of programs by characterizing their executions. We will see how the
+lambda calculus can be used to distill essence of computation into a few
+powerful constructs. We use that as a launching pad to study expressive type
+systems useful for for analyzing the behavior of programs at compile-time and
+then, how to derive expressive program analyses using Abstract Interpretation.
+
+All of the above will be done in a *concrete* fashion, i.e. by writing programs
+that define the various kinds of semantics, and writing  more programs that
+correspond to proofs about those objects!
 
 ## Diversity and Inclusion
 
