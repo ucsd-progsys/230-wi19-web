@@ -1,6 +1,6 @@
 # CSE 230: Proofs of Programs (for Programs (by Programs))
 
-Public course materials for UCSD CSE 230, Winter 2019
+Course materials for UCSD CSE 230, Winter 2019
 
 ## Course Description
 
@@ -28,7 +28,7 @@ correspond to proofs about those objects!
 
 - *Lectures:*          MWF 1:00p-1:50p in WLH 2113
 - *Final:*             Take home during finals week
-- *Announcements:*     [Posted on Piazza; check often!](https://piazza.com/class/jqk23zupq7a62c)
+- *Announcements:*     [Check Piazza, often!][piazza]
 
 ## Staff
 
@@ -197,3 +197,4 @@ instructor or TA to do so after final grades have been issued.
 [lh-github]:   https://github.com/ucsd-progsys/liquidhaskell
 [lh-blog]:     https://ucsd-progsys.github.io/liquidhaskell-blog/)
 [lh-install]:  https://github.com/ucsd-progsys/liquidhaskell/blob/develop/INSTALL.md
+[piazza]:      https://piazza.com/class/jqk23zupq7a62c
