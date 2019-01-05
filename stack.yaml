@@ -1,0 +1,9 @@
+# resolver: lts-5.9 
+resolver: lts-10.0
+
+flags: {}
+
+packages:
+  - '.'
+
+extra-deps: []
