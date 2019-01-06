@@ -28,16 +28,16 @@ correspond to proofs about those objects!
 
 - *Lectures:*          MWF 1:00p-1:50p in WLH 2113
 - *Final:*             Take home during finals week
-- *Announcements:*     [Check Piazza, often!][piazza]
+- *Announcements:*     [On Piazza](https://piazza.com/class/jqk23zupq7a62c)
 
 ## Staff
 
 - [Ranjit Jhala](http://ranjitjhala.github.io)
 - [Anish Tondwalkar](http://ani.sh/)
 
-## Calendar (Deadlines, Office Hours)
+## Calendar
 
-<iframe src="https://calendar.google.com/calendar/embed?src=eng.ucsd.edu_ovaal9f85a4m3jau65ifj3e9n0%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+- [Deadlines, Office Hours](https://calendar.google.com/calendar?cid=ZW5nLnVjc2QuZWR1X292YWFsOWY4NWE0bTNqYXU2NWlmajNlOW4wQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20)
 
 ## Text
 
@@ -47,21 +47,25 @@ There is **no text** for CSE 230, but we will be basing much of the material on:
 
 ## Proofs of Programs, for Programs, by Programs
 
-| Week | Topic                  | Link             |
-|-----:|:-----------------------|:-----------------|
-| 1.   | Refinement Types       | [link][kosmikus] |
-|      | *Proofs of Programs*   |                  |
-| 2.   | Induction I            |                  |
-| 3.   | Arithmetic Expressions |                  |
-| 4.   | Induction II           |                  |
-|      | *Proofs for Programs*  |                  |
-| 5.   | Operational Semantics  |                  |
-| 6.   | Axiomatic Semantics    |                  |
-| 7.   | Type Systems           |                  |
-|      | *Proofs by Programs*   |                  |
-| 8.   | Horn Clauses           |                  |
-| 9.   | Abs-Int                |                  |
-| 10.  | Refinement Types       |                  |
+| Week | Topic                  | Link                                     |
+|-----:|:-----------------------|:-----------------------------------------|
+| 1.   | Refinement Types       | [tutorial](https://liquid.kosmikus.org/) |
+|      |                        |                                          |
+|      | **Proofs of Programs** |                                          |
+| 2.   | Induction I            |                                          |
+| 3.   | Arithmetic Expressions |                                          |
+| 4.   | Induction II           |                                          |
+|      |                        |                                          |
+|      | **Proofs for Programs**|                                          |
+| 5.   | Operational Semantics  |                                          |
+| 6.   | Axiomatic Semantics    |                                          |
+| 7.   | Type Systems           |                                          |
+|      |                        |                                          |
+|      | **Proofs by Programs** |                                          |
+| 8.   | Horn Clauses           |                                          |
+| 9.   | Abs-Int                |                                          |
+| 10.  | Refinement Types       |                                          |
+|      |                        |                                          |
 
 ## Grading
 
@@ -93,12 +97,11 @@ after the deadline.
 
 ## Links
 
-
 ### LiquidHaskell
 
-- [Repo][lh-github]
-- [Install][lh-install]
-- [LiquidHaskell Blog][lh-blog]
+- [Repo](https://github.com/ucsd-progsys/liquidhaskell)
+- [Install](https://github.com/ucsd-progsys/liquidhaskell/blob/develop/INSTALL.md)
+- [Blog](https://ucsd-progsys.github.io/liquidhaskell-blog/)
 
 ### Getting Started with Haskell
 
@@ -193,8 +196,3 @@ use anonymized student assignments to design algorithms or build tools to
 help programmers. Any student who wishes to opt out can contact the
 instructor or TA to do so after final grades have been issued.
 **This has no impact on your grade in any manner.**
-
-[lh-github]:   https://github.com/ucsd-progsys/liquidhaskell
-[lh-blog]:     https://ucsd-progsys.github.io/liquidhaskell-blog/)
-[lh-install]:  https://github.com/ucsd-progsys/liquidhaskell/blob/develop/INSTALL.md
-[piazza]:      https://piazza.com/class/jqk23zupq7a62c
