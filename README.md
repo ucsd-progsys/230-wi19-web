@@ -47,25 +47,25 @@ There is **no text** for CSE 230, but we will be basing much of the material on:
 
 ## Proofs of Programs, for Programs, by Programs
 
-| Week | Topic                  | Link                                     |
-|-----:|:-----------------------|:-----------------------------------------|
-| 1.   | Refinement Types       | [tutorial](https://liquid.kosmikus.org/) |
-|      |                        |                                          |
-|      | **Proofs of Programs** |                                          |
-| 2.   | Induction I            |                                          |
-| 3.   | Arithmetic Expressions |                                          |
-| 4.   | Induction II           |                                          |
-|      |                        |                                          |
-|      | **Proofs for Programs**|                                          |
-| 5.   | Operational Semantics  |                                          |
-| 6.   | Axiomatic Semantics    |                                          |
-| 7.   | Type Systems           |                                          |
-|      |                        |                                          |
-|      | **Proofs by Programs** |                                          |
-| 8.   | Horn Clauses           |                                          |
-| 9.   | Abs-Int                |                                          |
-| 10.  | Refinement Types       |                                          |
-|      |                        |                                          |
+| Week | Topic                   | Link                                     |
+|-----:|:----------------------- |:-----------------------------------------|
+| 1.   | Refinement Types        | [tutorial](https://liquid.kosmikus.org/) |
+|      |                         |                                          |
+|      | **Proofs of Programs**  |                                          |
+| 2.   | Induction I             |                                          |
+| 3.   | Arithmetic Expressions  |                                          |
+| 4.   | Induction II            |                                          |
+|      |                         |                                          |
+|      | **Proofs for Programs** |                                          |
+| 5.   | Operational Semantics   |                                          |
+| 6.   | Axiomatic Semantics     |                                          |
+| 7.   | Type Systems            |                                          |
+|      |                         |                                          |
+|      | **Proofs by Programs**  |                                          |
+| 8.   | Horn Clauses            |                                          |
+| 9.   | Abstract Interpretation |                                          |
+| 10.  | Refinement Types        |                                          |
+|      |                         |                                          |
 
 ## Grading
 
