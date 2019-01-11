@@ -1,5 +1,9 @@
 # CSE 230: Proofs of Programs (for Programs (by Programs))
 
+```
+(a = 4 && b = 2 && v = a - b) => v >= 3
+```
+
 Course materials for UCSD CSE 230, Winter 2019
 
 ## Course Description
@@ -38,6 +42,10 @@ correspond to proofs about those objects!
 ## Calendar
 
 - [Deadlines, Office Hours](https://calendar.google.com/calendar?cid=ZW5nLnVjc2QuZWR1X292YWFsOWY4NWE0bTNqYXU2NWlmajNlOW4wQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20)
+
+## Prerequisites
+
+- Functional Programming e.g. CSE 130
 
 ## Text
 
