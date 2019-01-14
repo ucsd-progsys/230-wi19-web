@@ -1,9 +1,5 @@
 # CSE 230: Proofs of Programs (for Programs (by Programs))
 
-```
-(a = 4 && b = 2 && v = a - b) => v >= 3
-```
-
 Course materials for UCSD CSE 230, Winter 2019
 
 ## Course Description
