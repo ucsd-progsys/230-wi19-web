@@ -4,7 +4,7 @@
 {-@ LIQUID "--short-names" @-}
 module ReasoningAboutFunctions where 
 
-import Prelude hiding (sum, assert)
+import Prelude hiding (sum)
 import ProofCombinators
 \end{code}
 
@@ -16,6 +16,7 @@ Recall: Impossible
 impossible = error
 ```
 
+
 Assertions
 ==========
 
@@ -26,6 +27,7 @@ Lets use `impossible` to write a function `assert` such that:
 
 \begin{code}
 {-@ assert     :: {v:Bool | v} -> a -> a @-}
+assert :: Bool -> a -> a
 assert True  x = x
 assert False _ = impossible "Yikes: assert fails!" 
 \end{code}
@@ -204,9 +206,9 @@ To see why, lets look at the VCs!
      && (sum 1 == if 1 <= 0 then 0 else 1 + sum (1-1))  => sum 1 == 1           -- for: assert (sum 1 == 1) 
 
      
-        (sum 0 == if 0 <= 0 then 0 else 0 + sum (0-1))  
-     && (sum 1 == if 1 <= 0 then 0 else 1 + sum (1-1))  
-     && (sum 2 == if 2 <= 0 then 0 else 2 + sum (2-1))  => sum 2 == 3           -- for: assert (sum 2 == 3) 
+        (sum 0 == 0)  
+     && (sum 1 == 1 + sum 0)  
+     && (sum 2 == 2 + sum 1)  => sum 2 == 3           -- for: assert (sum 2 == 3) 
     
 
         (sum 0 == if 0 <= 0 then 0 else 0 + sum (0-1))  
@@ -273,7 +275,8 @@ Lets rewrite the proof of `sum 3 == 6` but *reusing* the proof of `sum 2 == 3`
 
 \begin{code}
 {-@ sum_3_equals_6' :: _ -> { sum 3 == 6 } @-} 
-sum_3_equals_6' _  
+sum_3_equals_6' :: () ->Int
+sum_3_equals_6' () 
   =   sum 3 
   === 3 + sum 2
       ? sum_2_equals_3 ()
@@ -301,3 +304,217 @@ Next, lets
 2. *Verify*  this fact as a *term* ? 
     
     ...
+
+Peano Numbers
+=============
+
+\begin{code}
+data Peano = Z | S Peano 
+  deriving (Eq, Show)
+\end{code}
+
+Elements of the type are
+
+\begin{code}
+p0, p1, p2, p3 :: Peano
+p0 =         Z      -- zero
+p1 =       S Z      -- one 
+p2 =    S (S Z)     -- two
+p3 = S (S (S Z))    -- three
+\end{code}
+
+Adding Peanos
+=============
+
+Lets write a function that `add`s two `Peano` numbers 
+
+\begin{code}
+-- >>> add Z (S (S Z)) 
+-- S (S Z)
+
+-- >>> add (S Z) (S (S Z)) 
+-- S (S (S Z))
+
+-- >>> add (S (S Z)) (S (S Z)) 
+-- S (S (S (S Z)))
+
+{-@ reflect add @-}
+add         :: Peano -> Peano -> Peano 
+add Z     m = m 
+add (S n) m = S (add n m)
+\end{code}
+
+Adding Zero 
+===========
+
+Lets specify and verify that
+
+    forall p. add Z p == p 
+
+-- DO IN CLASS
+
+
+Next, lets specify and verify that
+
+    forall p. add p Z == p 
+
+-- DO IN CLASS
+
+Addition is Commutative 
+=======================
+
+Finally, lets specify and verify that
+
+    forall p1 p2. add p1 p2 == add p2 p1
+
+-- DO IN CLASS
+
+Lists 
+===
+
+Recall the definition of lists
+
+\begin{code}
+data List a = Nil | Cons a (List a)
+  deriving (Eq, Show)
+\end{code}
+
+Appending Lists
+===
+
+Lets write a function to `app`end two lists
+
+\begin{code}
+{-@ reflect app @-}
+app :: List a -> List a -> List a 
+app Nil ys         = ys 
+app (Cons x xs) ys = Cons x (app xs ys)
+\end{code}
+
+Lists are like Peanos 
+===
+
+For example, appending a Nil returns the original list 
+
+
+Lets specify and verify that
+
+    forall l. app Nil l == l 
+
+-- DO IN CLASS
+
+
+Next, lets specify and verify that
+
+    forall l. app l Nil == l 
+
+-- DO IN CLASS
+
+
+Lists are Ordered Data 
+===
+
+So we can, e.g. fiddle around with the order. 
+
+Lets write a function to `rev`erse a list, so 
+
+\begin{code}
+-- >>> rev (Cons 0 (Cons 1 (Cons 2 (Cons 3 Nil))))
+-- Cons 3 (Cons 2 (Cons 1 (Cons 0 Nil)))
+rev :: List a -> List a 
+rev = undefined 
+\end{code}
+
+
+Btw, lets do a sanity check: if we `rev` a list twice, 
+we should get back the original:
+
+\begin{code}
+-- >>> rev (Cons 0 (Cons 1 (Cons 2 Nil)))
+-- Cons 2 (Cons 1 (Cons 0 Nil))
+
+-- >>> rev (Cons 2 (Cons 1 (Cons 0 Nil)))
+-- Cons 0 (Cons 1 (Cons 2 Nil))
+
+-- >>> rev (rev (Cons 0 (Cons 1 (Cons 2 Nil))))
+-- Cons 0 (Cons 1 (Cons 2 Nil)))
+\end{code}
+
+Sure, but does that hold *for all lists* ? Can we prove
+
+    forall l. rev (rev l) == l
+
+Lets first try to prove "by hand"...
+
+-- DO IN CLASS
+
+... oops, need to know what happens if you 
+
+    app (rev xs) (rev ys) 
+
+-- DO IN CLASS
+
+... oops, need to know what happens if you 
+
+    app (app xs ys) zs 
+
+-- DO IN CLASS
+
+We can use these *helper functions* (aka *lemmas*) to go 
+and finish off our theorem about `rev (rev xs)`.
+
+
+
+Trees 
+=====
+
+
+Here's a `Tree` data type
+
+\begin{code}
+data Tree a = Tip | Node (Tree a) a (Tree a)
+  deriving (Show)
+\end{code}
+
+Some example trees 
+
+\begin{code}
+{-@ reflect tt @-}
+{-@ reflect t1 @-}
+{-@ reflect t2 @-}
+{-@ reflect t3 @-}
+tt, t1, t2, t3 :: Tree Int
+tt = Tip 
+t1 = Node tt 1 tt 
+t2 = Node tt 3 tt 
+t3 = Node t1 2 t2 
+\end{code}
+
+
+Reversing a Tree 
+===
+
+What's the equivalent of `rev` on a `Tree` ?
+
+\begin{code}
+-- >>> revTree (Node (Node Tip 1 Tip) 2 (Node Tip 3 Tip))
+--     Node (Node Tip 3 Tip) 2 (Node Tip 2 Tip)
+revTree :: Tree a -> Tree a 
+revTree = undefined
+
+{-@ reflect mirror @-}
+mirror :: Tree a -> Tree a 
+mirror Tip          = Tip 
+mirror (Node l a r) = Node (mirror r) a (mirror l)
+
+
+\end{code}
+
+Reversing twice 
+===
+    
+Lets prove that 
+
+    forall t. revTree (revTree t) == t 
+
+-- DO IN CLASS

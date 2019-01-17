@@ -52,24 +52,24 @@ There is **no text** for CSE 230, but we will be basing much of the material on:
 ## Proofs of Programs, for Programs, by Programs
 
 | Week | Topic                   | Code             | Link                                     |
-|-----:|:----------------------- |:-----------------|:-----------------------------------------|
+|-----:|:------------------------|:-----------------|:-----------------------------------------|
 | 1.   | Refinement Types        | [lhs](src/Week1) | [tutorial](https://liquid.kosmikus.org/) |
-|      |                         |                  |                        |
-|      | **Proofs of Programs**  |                  |                        |
-| 2.   | Induction I             |                  |                        |
-| 3.   | Arithmetic Expressions  |                  |                        |
-| 4.   | Induction II            |                  |                        |
-|      |                         |                  |                        |
-|      | **Proofs for Programs** |                  |                        |
-| 5.   | Operational Semantics   |                  |                        |
-| 6.   | Axiomatic Semantics     |                  |                        |
-| 7.   | Type Systems            |                  |                        |
-|      |                         |                  |                        |
-|      | **Proofs by Programs**  |                  |                        |
-| 8.   | Horn Clauses            |                  |                        |
-| 9.   | Abstract Interpretation |                  |                        |
-| 10.  | Refinement Types        |                  |                        |
-|      |                         |                  |                        |
+|      |                         |                  |                                          |
+|      | **Proofs of Programs**  |                  |                                          |
+| 2.   | Programs  as Proofs     | [lhs](src/Week2) |                                          |
+| 3.   | Induction on Terms      |                  |                                          |
+| 4.   | Induction on Evidence   |                  |                                          |
+|      |                         |                  |                                          |
+|      | **Proofs for Programs** |                  |                                          |
+| 5.   | Operational Semantics   |                  |                                          |
+| 6.   | Axiomatic Semantics     |                  |                                          |
+| 7.   | Type Systems            |                  |                                          |
+|      |                         |                  |                                          |
+|      | **Proofs by Programs**  |                  |                                          |
+| 8.   | Horn Clauses            |                  |                                          |
+| 9.   | Abstract Interpretation |                  |                                          |
+| 10.  | Refinement Types        |                  |                                          |
+|      |                         |                  |                                          |
 
 ## Grading
 
