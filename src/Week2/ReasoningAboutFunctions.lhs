@@ -206,9 +206,9 @@ To see why, lets look at the VCs!
      && (sum 1 == if 1 <= 0 then 0 else 1 + sum (1-1))  => sum 1 == 1           -- for: assert (sum 1 == 1) 
 
      
-        (sum 0 == 0)  
-     && (sum 1 == 1 + sum 0)  
-     && (sum 2 == 2 + sum 1)  => sum 2 == 3           -- for: assert (sum 2 == 3) 
+        (sum 0 == if 0 <= 0 then 0 else 0 + sum (0-1))  
+     && (sum 1 == if 1 <= 0 then 0 else 1 + sum (1-1))  
+     && (sum 2 == if 2 <= 0 then 0 else 2 + sum (2-1))  => sum 2 == 3           -- for: assert (sum 2 == 3) 
     
 
         (sum 0 == if 0 <= 0 then 0 else 0 + sum (0-1))  
@@ -216,6 +216,8 @@ To see why, lets look at the VCs!
      && (sum 2 == if 2 <= 0 then 0 else 2 + sum (2-1))  
      && (sum 3 == if 3 <= 0 then 0 else 3 + sum (2-1))  => sum 2 == 3           -- for: assert (sum 3 == 6) 
      
+     
+(sum 2 == if 2 <= 0 then 0 else 2 + sum (2-1))  => sum 2 == 2 + sum 1
 
 Sure, now we can verify things about `sum` but its silly
 - which "inputs" should we "call" `sum` with? 
@@ -283,27 +285,33 @@ sum_3_equals_6' ()
   === 6
 \end{code}
 
+A Proper Proof  
+==============
 
-A Real Proof 
-============
+Lets try to *specify* and *prove* MJ's property:
+
+    for all natural numbers n:  n <= sum n 
+
+Another Real Proof 
+==================
 
 Lets try to *specify* and *prove* that:
 
-    for all natural numbers n:  0 + 1 + ... + n == (n * (n - 1) / 2)
+    for all natural numbers n:  2 * sum n == n * (n - 1)
 
 First, lets "prove" it "by hand"
 
-    ...
+    -- TODO IN CLASS 
 
 Next, lets 
 
 1. *Specify* this fact as a *type* ?
 
-    ...
+    -- TODO IN CLASS 
 
 2. *Verify*  this fact as a *term* ? 
     
-    ...
+    -- TODO IN CLASS 
 
 Peano Numbers
 =============
@@ -363,6 +371,8 @@ Next, lets specify and verify that
 Addition is Commutative 
 =======================
 
+-- HEREHERE REVISIT theorem_MJ 
+
 Finally, lets specify and verify that
 
     forall p1 p2. add p1 p2 == add p2 p1
@@ -395,7 +405,6 @@ Lists are like Peanos
 ===
 
 For example, appending a Nil returns the original list 
-
 
 Lets specify and verify that
 
