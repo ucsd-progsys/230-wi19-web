@@ -85,7 +85,10 @@ thm_2_add_2_eq_4 _
 
 {-@ thm_add_Z :: p:Peano -> { add Z p == p } @-} 
 thm_add_Z :: Peano -> Proof 
-thm_add_Z p = add Z p === p *** QED 
+thm_add_Z p 
+  =   add Z p 
+  === p 
+  *** QED 
 
 {-@ thm_Z_add :: p:Peano -> { add p Z == p } @-} 
 thm_Z_add :: Peano -> Proof 
@@ -96,8 +99,9 @@ thm_Z_add Z
     *** QED 
 
 thm_Z_add (S p) 
-    = add (S p) Z 
-    === S (add p Z) ? thm_Z_add p 
+    =   add (S p) Z 
+    === S (add p Z)
+      ? thm_Z_add p
     === S p 
     *** QED 
 
