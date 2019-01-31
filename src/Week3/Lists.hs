@@ -27,8 +27,8 @@ rev (x:xs) = rev xs ++ [x]
 {-@ lemma_app_assoc :: xs:_ -> ys:_ -> zs:_ -> 
       { (xs ++ ys) ++ zs = xs ++ (ys ++ zs) } @-} 
 lemma_app_assoc :: [a] -> [a] -> [a] -> Proof 
-lemma_app_assoc []     ys zs = () 
-lemma_app_assoc (x:xs) ys zs = lemma_app_assoc xs ys zs
+lemma_app_assoc []     _  _  = () 
+lemma_app_assoc (_:xs) ys zs = lemma_app_assoc xs ys zs
 
 {-@ lemma_app_Nil2 :: xs:_ -> { xs ++ [] = xs } @-}
 lemma_app_Nil2 :: [a] -> Proof 

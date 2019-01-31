@@ -87,7 +87,7 @@ plus a      (N 0)  = a
 plus a1     a2     = Plus a1 a2
 
 {-@ lemma_aval_plus :: a1:_ -> a2:_ -> s:_ -> 
-      { aval (plus a1 a2) s = aval a1 s + aval a2 s } 
+      { aval (plus a1 a2) s = aval (Plus a1 a2) s } 
   @-}
 lemma_aval_plus :: AExp -> AExp -> State -> Proof 
 lemma_aval_plus (N _) (N _) _ = () 

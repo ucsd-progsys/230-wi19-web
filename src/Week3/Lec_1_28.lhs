@@ -161,8 +161,16 @@ thm_rev_rev (Cons x xs)
 
 {-@ thm_rev_app :: as:_ -> bs:_ -> { rev (app as bs) == app (rev bs) (rev as) } @-}
 thm_rev_app :: List a -> List a -> Proof 
-thm_rev_app = undefined
-
+thm_rev_app Nil bs 
+  = undefined -- rev (app Nil bs) === rev bs === rev bs `app` Nil *** QED 
+thm_rev_app (Cons a as) bs 
+  =   rev (app (Cons a as) bs) 
+  === rev (Cons a (app as bs))
+  === rev (app as bs) `app` (Cons a Nil)
+  === (rev bs `app` rev as) `app` (Cons a Nil)
+  === (rev bs) `app` (rev as `app` (Cons a Nil))
+  === app (rev bs) (rev (Cons a as))   
+  *** QED 
 {- 
 
 rev ([a1, a2, a3]  ++ [b1, b2, b3])
