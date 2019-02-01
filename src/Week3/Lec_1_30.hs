@@ -1,6 +1,7 @@
 {-@ LIQUID "--short-names" @-}
 {-@ LIQUID "--reflection"  @-}
 {-@ LIQUID "--ple"         @-}
+{-@ LIQUID "--diff"        @-}
 
 {-# LANGUAGE PartialTypeSignatures #-}
 
@@ -94,12 +95,6 @@ foo (Plus a1 a2) s = case (asimp_const a1, asimp_const a2) of
                       ? foo a2 s
   
 
-  -- case (asimp_const a1, asimp_const a2) of 
-  -- (N n1, N n2) -> N (n1 + n2) 
-  -- (b1  , b2)   -> Plus b1 b2
--- lemma_aval_asimp_const 
-
-
 
 
 --------------------------------------------------------------------------------
@@ -107,6 +102,7 @@ foo (Plus a1 a2) s = case (asimp_const a1, asimp_const a2) of
 --------------------------------------------------------------------------------
 -- plus 
 -- lemma_aval_plus 
+-- HW 
 
 --------------------------------------------------------------------------------
 -- | Recursive simplification using "Smart" Constructors
@@ -119,6 +115,33 @@ foo (Plus a1 a2) s = case (asimp_const a1, asimp_const a2) of
 -- | Digression: Assignment 
 --------------------------------------------------------------------------------
 
+-- substitute "x" with "e" inside "a"
+subst :: Vname -> AExp -> AExp -> AExp 
+subst x e (Plus a1 a2)   = Plus (subst x e a1) (subst x e a2) 
+subst x e (V y) | x == y = e 
+subst _ _ a              = a 
+
+{- 
+
+lem_subst :: x:_ -> a:_ -> e:_ -> s:_ 
+          -> { aval e (set x (aval a s) s)  == aval (subst x a e) s }
+
+
+  S     [a > 1000]          the "value" of "replace all occurence of x with a in e"  in s/
+
+    x := a 
+
+
+  S'    [x > 1000]          the "value" of the "e" in s' 
+
+  WHAT IS 
+  
+      aval e s' 
+
+  "add" a to e 
+
+ -}
+
 -- DISCUSS
 
 --------------------------------------------------------------------------------
@@ -127,9 +150,7 @@ foo (Plus a1 a2) s = case (asimp_const a1, asimp_const a2) of
 
 -- data BExp 
 -- bval 
-
 -- simplifications 
-
 -- bNot, bAnd, bLess, bSimp 
 
 --------------------------------------------------------------------------------

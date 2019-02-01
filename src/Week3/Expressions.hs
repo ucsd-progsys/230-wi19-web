@@ -15,7 +15,6 @@ import qualified State as S
 --------------------------------------------------------------------------------
 -- | Arithmetic Expressions 
 --------------------------------------------------------------------------------
-
 type Vname = String
 
 data AExp  
@@ -74,6 +73,22 @@ lemma_aval_asimp_const (Plus a1 a2) s
   = case (asimp_const a1, asimp_const a2) of 
       (N _, N _) -> lemma_aval_asimp_const a1 s &&& lemma_aval_asimp_const a2 s 
       (_  , _)   -> lemma_aval_asimp_const a1 s &&& lemma_aval_asimp_const a2 s 
+
+--------------------------------------------------------------------------------
+-- | Q: Why is the "case-of" important in the proof?
+--------------------------------------------------------------------------------
+
+{-@ reflect silly @-}
+silly :: AExp -> Int 
+silly (N _)        = 0
+silly (V _)        = 0 
+silly (Plus a1 a2) = silly a1 + silly a2 
+
+{-@ lem_silly :: a:_ -> { silly a == 0 } @-} 
+lem_silly :: AExp -> Proof 
+lem_silly (N _)      = () 
+lem_silly (V _)      = () 
+lem_silly (Plus a1 a2) = lem_silly a1 &&& lem_silly a2  
 
 --------------------------------------------------------------------------------
 -- | "Smart" Constructors
@@ -185,7 +200,6 @@ bsimp (Not b)      = bNot  (bsimp b)
 bsimp (And b1 b2)  = bAnd  (bsimp b1) (bsimp b2)
 bsimp (Less a1 a2) = bLess (asimp a1) (asimp a2)
 
-
 --------------------------------------------------------------------------------
 -- | Stack Machine 
 --------------------------------------------------------------------------------
@@ -200,10 +214,10 @@ type Stack = [Val]
 
 {-@ reflect exec1 @-}
 exec1 :: Instr -> State -> Stack -> Stack
-exec1 (LOADI n) _ stk       = n     : stk 
+exec1 (LOADI n) _ stk       = n           : stk 
 exec1 (LOAD x)  s stk       = (S.get s x) : stk
-exec1 ADD       _ (j:i:stk) = (i+j) : stk 
-exec1 _         _ stk       = [] 
+exec1 ADD       _ (j:i:stk) = (i+j)       : stk 
+exec1 _         _ _         = [] 
 
 {-@ reflect exec @-}
 exec :: [Instr] -> State -> Stack -> Stack 
