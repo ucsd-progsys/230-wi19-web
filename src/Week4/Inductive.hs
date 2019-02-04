@@ -9,21 +9,26 @@ module Inductive where
 
 import           Prelude hiding ((++)) 
 import           ProofCombinators 
-import           Peano 
-import           Expressions 
 import           Lists 
+import           Expressions 
 import qualified State as S 
 
 --------------------------------------------------------------------------------
--- | Section 4.5.1 IndEven
+-- | Peano numbers
+--------------------------------------------------------------------------------
+data Peano = Z | S Peano
+
+--------------------------------------------------------------------------------
+-- | Defining "Even Numbers"
 --------------------------------------------------------------------------------
 
--- | The Prop describing an Even number 
+-- | The "Prop" describing an Even number `(Ev n)`
 
 data EvP where
   Ev :: Peano -> EvP
 
--- | The Predicate describing the closure of a relation 
+-- | The ways to "construct evidence" of evenness i.e. that "prove" `Ev n`
+
 data Ev where
   EvZ :: Ev 
   EvS :: Peano -> Ev -> Ev 
@@ -32,6 +37,25 @@ data Ev where
       EvZ :: Prop (Ev Z) 
     | EvS :: n:Peano -> Prop (Ev n) -> Prop (Ev (S (S n))) 
   @-}
+
+{- | Read the above as there are two "rules" to determine even-ness 
+
+     1. 
+
+      ------------------ [EvZ]
+         Ev Z  
+
+
+
+     2.
+
+         Ev n
+      ------------------ [EvS]
+         Ev (S (S n))  
+
+
+ -}
+
 
 {-@ measure evNat @-}
 {-@ evNat      :: Ev -> Nat @-}
@@ -78,7 +102,7 @@ data Star a where
   Refl :: Rel a -> a -> Star a
   Step :: Rel a -> a -> a -> a -> Star a -> Star a
 
-{-@ data Star [starNat] a where
+{-@ data Star a where
       Refl :: r:Rel a -> x:a -> Prop (Star r x x)
     | Step :: r:Rel a -> x:a -> y:{a | r x y} -> z:a -> Prop (Star r y z) -> Prop (Star r x z)
   @-}
@@ -110,7 +134,7 @@ data Pal a where
   Pal1 :: a -> Pal a 
   Pals :: a -> [a] -> Pal a -> Pal a 
 
-{-@ data Pal [palNat] a where
+{-@ data Pal a where
       Pal0 :: Prop (Pal []) 
     | Pal1 :: x:_ -> Prop (Pal (single x)) 
     | Pals :: x:_ -> xs:_ -> Prop (Pal xs) -> Prop (Pal (mkPal x xs)) 
@@ -141,15 +165,13 @@ lemma_pal xs  (Pals y ys pys) =
   -- === rev (mkPal y ys)
   -- === rev (y : (ys ++ [y])) 
   -- ===
-    (rev (ys ++ [y]))  ++ [y]      -
+    (rev (ys ++ [y]))  ++ [y]      --
     ? lemma_rev_app ys [y] 
   -- === ([y] ++ rev ys) ++ [y]
     ? lemma_pal ys pys
   -- === xs 
     *** QED 
 
-
--- zoo :: xs:_ -> y:_ -> ys:_ ->  
 --------------------------------------------------------------------------------
 -- | The Prop declaring the AVal predicate 
 data AvalP where
@@ -161,7 +183,7 @@ data Aval where
   AvalV :: State -> Vname -> Aval 
   AvalP :: State -> AExp -> Val -> AExp -> Val -> Aval -> Aval -> Aval 
 
-{-@ data Aval [avalNat] where
+{-@ data Aval where
       AvalN :: s:_ -> n:_ -> Prop (Aval s (N n) n) 
     | AvalV :: s:_ -> x:_ -> Prop (Aval s (V x) (S.get s x)) 
     | AvalP :: s:_ -> a1:_ -> v1:_ -> a2:_ -> v2:_ 
