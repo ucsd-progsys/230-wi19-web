@@ -56,8 +56,8 @@ There is **no text** for CSE 230, but we will be basing much of the material on:
 | 1.   | Refinement Types        | [lhs](src/Week1) | [tutorial](https://liquid.kosmikus.org/) |
 |      |                         |                  |                                          |
 |      | **Proofs of Programs**  |                  |                                          |
-| 2.   | Programs  as Proofs     | [lhs](src/Week2) |                                          |
-| 3.   | Induction on Terms      |                  |                                          |
+| 2.   | Programs  as Proofs     | [lhs](src/Week2) | Ch2 of Nipkow & Klein                    |
+| 3.   | Induction on Terms      | [lhs](src/Week3) | Ch3 of Nipkow & Klein		       |
 | 4.   | Induction on Evidence   |                  |                                          |
 |      |                         |                  |                                          |
 |      | **Proofs for Programs** |                  |                                          |
