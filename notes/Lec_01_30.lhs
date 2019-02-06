@@ -1,6 +1,6 @@
 ### CSE 230: Programming Languages
 ### Winter 2019
-### Friday, January 25 (Lecture 9)
+### Wednesday, January 30 (Lecture 9)
 ##### Instructor: Ranjit Jhala
 ##### Scribe: Michael Borkowski
 
