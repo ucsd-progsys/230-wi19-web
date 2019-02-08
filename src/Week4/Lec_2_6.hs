@@ -1,11 +1,11 @@
 {-@ LIQUID "--reflection" @-}
-{-@ LIQUID "--diff"       @-}
+{- LIQUID "--diff"       @-}
 {-@ LIQUID "--ple"        @-}
 {-@ infixr ++  @-}  -- TODO: Silly to have to rewrite this annotation!
 
 {-# LANGUAGE GADTs #-}
 
-module Lec_2_4 where
+module Lec_2_6 where
 
 import           Prelude hiding ((++)) 
 import           ProofCombinators 
@@ -23,12 +23,11 @@ data Peano where
 
 {-@ reflect isEven @-}
 isEven :: Peano -> Bool 
-isEven Z     = True 
-isEven (S n) = not (isEven n) 
-
-
+isEven Z         = True 
+isEven (S n)     = not (isEven n)
+-- isEven (S Z)     = False 
+-- isEven (S (S n)) = isEven n 
 -- (isEven k)
-
 -- (isWellTyped p)
 
 -- 1. define "div-by-2" or "mod-2"
@@ -36,7 +35,7 @@ isEven (S n) = not (isEven n)
 -- 3. "recur" 
 -- 4. make a NEW type
 
-----
+
 {- 
     data List a = Nil | Cons a (List a)
    
@@ -67,7 +66,7 @@ zero_is_Even = EvZ
 
 {-@ two_is_Even :: Prop (Ev (S (S Z))) @-}
 two_is_Even :: Ev 
-two_is_Even = EvS Z EvZ 
+two_is_Even = EvS Z zero_is_Even 
 
 {-@ four_is_Even :: Prop (Ev (S (S (S (S Z))))) @-}
 four_is_Even :: Ev 
@@ -91,8 +90,36 @@ four_is_Even = EvS (S (S Z)) two_is_Even
 
 -- | Q: Have we really defined Ev? 
 
--- n:_ -> isEven n -> Prop (Ev n)
--- n:_ ->  Prop (Ev n) -> isEven n 
+
+{-@ lem_isEven :: n:_ ->  Prop (Ev n) -> { isEven n }  @-}
+lem_isEven :: Peano -> Ev -> Proof 
+lem_isEven Z     _              = () 
+lem_isEven (S Z) EvZ            = () -- impossible "haha"
+lem_isEven (S Z) (EvS _ _)      = () -- impossible "haha"
+-- lem_isEven (S (S m))  EvZ       = () -- undefined 
+lem_isEven (S (S m))  (EvS _m ev_m) =   isEven (S (S m)) 
+                                    === not (not (isEven m))
+                                    === isEven m 
+                                      ? lem_isEven m ev_m 
+                                    === True 
+                                    *** QED 
+
+-- "call  'lem_isEven m ev_m' ===> 'isEven m'
+
+{-@ lemon :: n:{_| isEven n} -> Prop (Ev n) @-}
+lemon :: Peano -> Ev 
+lemon Z         = EvZ
+lemon (S Z)     = impossible "asdasdasd" -- impossible "asdasd" 
+-- lemon (S (S mm)) = EvS mm (lemon mm) 
+lemon (S m)     = case m of 
+                    Z    -> impossible "are you clever?" 
+                    S mm -> EvS mm (lemon mm) 
+
+
+
+
+
+
 
 {-@ lemma_ev :: n:_ -> Prop (Ev n) -> {isEven n} @-} 
 lemma_ev :: Peano -> Ev -> Proof 

@@ -33,7 +33,7 @@ data Ev where
   EvZ :: Ev 
   EvS :: Peano -> Ev -> Ev 
 
-{-@ data Ev [evNat] where
+{-@ data Ev where
       EvZ :: Prop (Ev Z) 
     | EvS :: n:Peano -> Prop (Ev n) -> Prop (Ev (S (S n))) 
   @-}
