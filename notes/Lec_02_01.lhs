@@ -65,14 +65,14 @@ lem_silly (Plus a1 a2) = lem_silly a1 &&& lem_silly a2
 \end{code}
 
 So, after the proof which has the same structure as the function we are trying to think about, 
-we can talk about the proof that is same as the function we talked about. Now we build a small stack machine:
+we can talk about the proof that is same as the function we talked about. 
 
+Now let's build a small stack machine:
 
 ### Stack Machine
 An example:
-for an expression ((x+2) + ((3+y)+10))
-inorder-traversal of a tree to generate the result of the expression:
-
+For an expression ((x+2) + ((3+y)+10))
+Traverse a tree using inorder to generate the result of the expression:
                         +
                     /        \
                    +           +   
@@ -81,8 +81,13 @@ inorder-traversal of a tree to generate the result of the expression:
                            /  \
                            3   y
   
-Now we write a function calculate it. Then we should prove the siplifer works correctly.
-First we define a small instruction set for an abstract stack machine:
+Let's transform it to a normal form. Which means for every plus, the left-hand argument must be a variable.
+So we write it in such a form: (x+y) + (2+3+10) = x+y+15.
+The exercise is called full_simplify. You should write a function to do this transformation first.
+Then you need to prove your simplifier is correct.
+However, what we do now is a different exercise. We'll build a small stack machine, which takes an expression and compilers it down to a sequence of machine instructions. 
+The instruction is defined as following:
+
 \begin{code}
 data Instr
  = LOADI Val
@@ -112,8 +117,8 @@ ADD		      // 113:[]
 ]
 
 So the program is a list of instructions and stack is a list of values. Now we write 
-a function exec1. It takes the next instruction you want to run, state, current stack 
-and give the output stack. Execute next instruction and recursively generate the remaining.
+a function exec1. It takes the next instruction you want to run, state(there is only one state), current stack 
+and give the output stack. 
 
 \begin{code}
 {-@ reflect exec1 @-}
@@ -128,6 +133,8 @@ exec1 _         _ _         = []
 A: If we use “impossible”, we need to prove it is in fact impossible. Actually it is 
 not impossible. In this case, we do not really care.
 
+We define `exec` to process multiple instructions. The key idea is to execute next instruction and recursively excute the remaining instructions from that set.
+
 \begin{code}
 {-@ reflect exec @-}
 exec :: [Instr] -> State -> Stack -> Stack
@@ -135,9 +142,9 @@ exec []     _ stk = stk
 exec (i:is) s stk = exec is s (exec1 i s stk)
 \end{code}
 
-
 ### Compiling Arithmetic Expressions to a Stack Machine
-Now let’s write a compiler. It takes an expression, and give a sequence of instructions.
+Now let’s write a function `comp`. It takes an expression, and give a sequence of instructions.
+The difference is that it does not look at state or stack. We use `append` here.
 
 \begin{code}
 {-@ reflect comp @-}
@@ -146,7 +153,6 @@ comp (N n)        = [LOADI n]
 comp (V x)        = [LOAD x]
 comp (Plus a1 a2) = comp a1 ++ (comp a2 ++ [ADD])
 \end{code}
-
 
 ### Correctness of compilation
 
@@ -170,6 +176,7 @@ thm_comp (Plus a1 a2) s stk
 ==! cons (aval (Plus a1 a2) s) stk  --need a lemma here
 ***QED
 \end{code}
+
 As we can see, to complete the proof, we need a lemma. This lemma tells us that, the 
 result of our execution of instructions is equal to the result of dividing these 
 instructions into two parts and then executing them in order.
