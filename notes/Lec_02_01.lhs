@@ -6,10 +6,10 @@
 
 #### Recap:
 We have finished talking about regular induction. Last time we talked about Arithmetic 
-Expressions, and constant folding in expression simplification.
+Expressions and constant folding in expression simplification.
 
-We have a constant simplifier. If the two arguments are both numbers, we will have 
-a number. But what if either is not a number? We need both cases for use of the 
+Suppose that we have a constant simplifier. If the two arguments are both numbers, we will have 
+a number. But what if either is not a number? We do a case split here and both cases are needed for use of the 
 simplifier constructor.
 
 \begin{code}
@@ -23,11 +23,11 @@ asimp_const (Plus a1 a2) = case (asimp_const a1, asimp_const a2) of
 \end{code}
 
 Now we want to prove the equivalence of expressions. The equivalence means for any 
-state s, the value of original expression is the same as the simplifier expressions. 
-Let’s split cases into three. In the first case, the input is a number N, and the 
-output is also a number N. So aval (asimp_const a) s and aval a s are the same 
-thing. And the variable is similar. The most interesting case is Plus. We split 
-it to two cases here. But how to prove it?
+state s, the value of original expression is the same as the simplifier expression's value. 
+We expect the proof looks like the function itself. Let’s split cases into three. In the first case, the input is a number N, and the 
+output is also a number N. So `aval (asimp_const a) s` and `aval a s` are the same 
+thing. And the variable is similar because that is what is happening in the definition itself. The most interesting case is Plus. 
+Why could we just leave it as that? In a sense, we need to split cases to how actual function behaves. We will go through a simple example that makes kind of the same issue.
 
 \begin{code}
 {-@ lemma_aval_asimp_const :: a:_ -> s:_ -> { aval (asimp_const a) s = aval a s } @-}
@@ -41,7 +41,8 @@ lemma_aval_asimp_const (Plus a1 a2) s
 \end{code}
 
 Q: Why is the "case-of" important in the proof?
-Let’s first suppose we have a reflect silly.
+Let’s first suppose we have a silly function.
+
 \begin{code}
 {-@ reflect silly @-}
 silly :: AExp -> Int 
@@ -50,10 +51,11 @@ silly (V _)        = 0
 silly (Plus a1 a2) = silly a1 + silly a2 
 \end{code}
 
-And we want to prove `lem_silly` where `silly a == 0`. The reason I split it is we 
-do not have enough information to prove `silly a == 0`. When a is number, `silly a == 0` 
+And we want to prove therom `lem_silly` where `silly a == 0`. The reason I split it is we 
+do not have enough information about what a is in order to make this step. When a is number, `silly a == 0` 
 according to the definition. The second case is similar. And we use induction to prove 
 the final case recursively.
+
 \begin{code}
 {-@ lem_silly :: a:_ -> { silly a == 0 } @-} 
 lem_silly :: AExp -> Proof 
@@ -62,8 +64,8 @@ lem_silly (V _)      = ()
 lem_silly (Plus a1 a2) = lem_silly a1 &&& lem_silly a2  
 \end{code}
 
-
-After the proof of a lemma which has similar structure, now we build a small stack machine:
+So, after the proof which has the same structure as the function we are trying to think about, 
+we can talk about the proof that is same as the function we talked about. Now we build a small stack machine:
 
 
 ### Stack Machine
@@ -99,14 +101,14 @@ is for constant and `LOAD` is for variable. We need a stack to hold temporary va
 Initially, my stack is empty. Stack after each instruction is in the comment. Let’s 
 say `X = 100` here.
 [
-		// []
+		        // []
 LOADI 2,  	// 2:[]
-LOADI 4,	// 4:2:[]
-ADD,		// 6:[]
-LOADI7,	// 7:6:[]
-LOAD “X”,	// 100:7:6:[] 
-ADD		// 107:6:[]
-ADD		// 113:[]
+LOADI 4,	  // 4:2:[]
+ADD,		    // 6:[]
+LOADI7,	    // 7:6:[]
+LOAD “X”,	  // 100:7:6:[] 
+ADD		      // 107:6:[]
+ADD		      // 113:[]
 ]
 
 So the program is a list of instructions and stack is a list of values. Now we write 
