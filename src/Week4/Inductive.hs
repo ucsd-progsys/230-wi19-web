@@ -104,7 +104,8 @@ data Star a where
 
 {-@ data Star a where
       Refl :: r:Rel a -> x:a -> Prop (Star r x x)
-    | Step :: r:Rel a -> x:a -> y:{a | r x y} -> z:a -> Prop (Star r y z) -> Prop (Star r x z)
+    | Step :: r:Rel a -> x:a -> y:{a | r x y} -> z:a -> Prop (Star r y z) 
+           -> Prop (Star r x z)
   @-}
 
 {-@ measure starNat          @-}
@@ -119,6 +120,10 @@ starNat (Step _ _ _ _ s) = 1 + starNat s
       -> Prop (Star r y z)
       -> Prop (Star r x z)
   @-}
+
+
+
+  
 lemma_star_trans :: Rel a -> a -> a -> a -> Star a -> Star a -> Star a
 lemma_star_trans r x y z (Refl _ _)          yz = yz
 lemma_star_trans r x y z (Step _ _ x1 _ x1y) yz = Step r x x1 z (lemma_star_trans r x1 y z x1y yz)
@@ -195,34 +200,3 @@ data Aval where
 {-@ reflect add @-}
 add :: Val -> Val -> Val
 add x y = x + y
-
-{-@ measure avalNat @-}
-{-@ avalNat :: Aval -> Nat @-}
-avalNat :: Aval -> Int
-avalNat (AvalN {})              = 0
-avalNat (AvalV {})              = 0
-avalNat (AvalP _ _ _ _ _ p1 p2) = 1 + avalNat p1 + avalNat p2 
-
-{-@ ple lem_aval_1 @-}
-{-@ lem_aval_1 :: s:_ -> a:_ -> n:_ -> Prop (Aval s a n) -> { aval a s = n} @-}
-lem_aval_1 :: State -> AExp -> Val -> Aval -> Proof 
-lem_aval_1 _ (N _) n (AvalN {}) 
-  = () 
-lem_aval_1 s (V x) v (AvalV {}) 
-  = () 
-lem_aval_1 s (Plus a1 a2) v (AvalP _ _ v1 _ v2 p1 p2) 
-  =   lem_aval_1 s a1 v1 p1 
-  &&& lem_aval_1 s a2 v2 p2 
-
-
-{-@ ple lem_aval_2 @-}
-{-@ lem_aval_2 :: s:_ -> a:_ -> Prop (Aval s a (aval a s)) @-}
-lem_aval_2 :: State -> AExp -> Aval 
-lem_aval_2 s (N n)        = AvalN s n 
-lem_aval_2 s (V x)        = AvalV s x 
-lem_aval_2 s (Plus a1 a2) = AvalP s a1 v1 a2 v2 p1 p2 
-  where 
-    v1                    = aval a1 s
-    v2                    = aval a2 s 
-    p1                    = lem_aval_2 s a1
-    p2                    = lem_aval_2 s a2 

@@ -93,18 +93,7 @@ four_is_Even = EvS (S (S Z)) two_is_Even
 
 -- n:_ -> isEven n -> Prop (Ev n)
 -- n:_ ->  Prop (Ev n) -> isEven n 
-
-{-@ lemma_ev :: n:_ -> Prop (Ev n) -> {isEven n} @-} 
-lemma_ev :: Peano -> Ev -> Proof 
-lemma_ev Z          _         = () 
-lemma_ev (S Z)      EvZ       = () 
-lemma_ev (S (S n)) (EvS _ pn) = lemma_ev n pn  
-lemma_ev _ _ = impossible "hoho" 
-
-
-
-
-
+d
 
 
 dummy :: Int

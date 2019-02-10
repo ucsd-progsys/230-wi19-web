@@ -27,7 +27,9 @@ isEven Z         = True
 isEven (S n)     = not (isEven n)
 -- isEven (S Z)     = False 
 -- isEven (S (S n)) = isEven n 
+
 -- (isEven k)
+
 -- (isWellTyped p)
 
 -- 1. define "div-by-2" or "mod-2"
@@ -127,10 +129,6 @@ lemma_ev Z          _         = ()
 lemma_ev (S Z)      EvZ       = () 
 lemma_ev (S (S n)) (EvS _ pn) = lemma_ev n pn  
 lemma_ev _ _ = impossible "hoho" 
-
-
-
-
 
 
 
