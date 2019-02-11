@@ -38,8 +38,10 @@ aval (Plus e1 e2) s = aval e1 s + aval e2 s
 
 {-@ foog :: { v: Int | v == 30 } @-} 
 foog :: Int
-foog = aval ex2 state1
+foog = aval ex2 st1
   where 
+    st1 :: State
+    st1 = S.GState [] 10 
     -- 12 
     ex0 = N 12 
     -- x + 9
@@ -47,9 +49,9 @@ foog = aval ex2 state1
     -- x + y + z
     ex2 = Plus (V "x") (Plus (V "y") (V "z"))
     
-{-@ reflect state1 @-}
-state1 :: State 
-state1 = S.init 10 
+{- reflect state1 @-}
+-- state1 :: State 
+-- state1 = S.GState [] 10
 
 --------------------------------------------------------------------------------
 -- | Constant Folding 

@@ -110,7 +110,6 @@ lemma_pal xs  py@(Pals y ys pal_ys)
 -- xs     = y : (ys ++ [y])
 -- pal_ys :: Prop (Pal ys) -- >by IH --> ys == rev ys
 
-
 {-@ reflect single @-}
 single :: a -> [a]
 single x = [x]
@@ -121,3 +120,76 @@ mkPal x xs = x : (xs ++ [x])
 
 dummy :: Int
 dummy = 10 
+
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+{- 
+
+data AExp  
+  = N Val 
+  | V Vname 
+  | Plus AExp AExp 
+
+WANT: 
+
+
+  (AVal s a n)
+
+  - The expression `a` 
+  - ... in the state `s` 
+  - ... evaluates to the value `n`
+
+Numbers 
+
+      -------------------[AvalN]
+        AVal s (N n) n
+
+      --------------------------[AvalV]
+        AVal s (V x) (get s x)
+
+        (AVal s a1 n1) (AVal s a2 n2)
+      ---------------------------------[AvalP]
+        AVal s (Plus a1 a2) (n1 + n2) 
+-}
+
+-- | The Prop declaring the AVal predicate 
+data AvalP where
+  Aval :: State -> AExp -> Val -> AvalP 
+
+-- | The Predicate implementing the Palindrom predicate 
+data Aval where
+  AvalN :: State -> Val   -> Aval 
+  AvalV :: State -> Vname -> Aval 
+  AvalP :: State -> AExp -> Val -> AExp -> Val -> Aval -> Aval -> Aval 
+
+{-@ data Aval where
+      AvalN :: s:_ -> n:_ 
+            -> Prop (Aval s (N n) n) 
+    | AvalV :: s:_ -> x:_ 
+            -> Prop (Aval s (V x) (S.get s x)) 
+    | AvalP :: s:_ -> a1:_ -> n1:_ -> a2:_ -> n2:_ 
+            -> Prop (Aval s a1 n1) 
+            -> Prop (Aval s a2 n2)
+            -> Prop (Aval s (Plus a1 a2) {n1 + n2})
+  @-}
+
+{-@ lem_Aval :: s:_ -> a:_ -> n:_ -> Prop (Aval s a n) 
+              -> { n == aval a s } @-}
+lem_Aval :: State -> AExp -> Val -> Aval -> Proof 
+lem_Aval s (N n)        _n (AvalN {}) 
+   = () 
+lem_Aval s (V x)        _  (AvalV {}) 
+   = () 
+lem_Aval s (Plus a1 a2) _  (AvalP _s _a1 n1 _a2 n2 p_a1_n1 p_a2_n2) 
+   =   lem_Aval s a1 n1 p_a1_n1 -- aval a1 s == n1 
+   &&& lem_Aval s a2 n2 p_a2_n2 -- aval a2 s == n2
+lem_Aval s _ _ _      
+   = impossible "hush, GHC." 
+
+{-@ reflect add @-}
+add :: Val -> Val -> Val
+add x y = x + y

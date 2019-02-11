@@ -1,6 +1,6 @@
 {-@ LIQUID "--reflection" @-}
-{-@ LIQUID "--diff"       @-}
-{-@ LIQUID "--ple-local"  @-}
+{- LIQUID "--diff"       @-}
+{-@ LIQUID "--ple"        @-}
 {-@ infixr ++  @-}  -- TODO: Silly to have to rewrite this annotation!
 
 {-# LANGUAGE GADTs #-}
@@ -178,24 +178,45 @@ lemma_pal xs  (Pals y ys pys) =
     *** QED 
 
 --------------------------------------------------------------------------------
--- | The Prop declaring the AVal predicate 
-data AvalP where
-  Aval :: State -> AExp -> Val -> AvalP 
+-- | The Prop declaring the AvRel predicate 
+data AvRelP where
+  AvRel :: State -> AExp -> Val -> AvRelP 
 
 -- | The Predicate implementing the Palindrom predicate 
-data Aval where
-  AvalN :: State -> Val   -> Aval 
-  AvalV :: State -> Vname -> Aval 
-  AvalP :: State -> AExp -> Val -> AExp -> Val -> Aval -> Aval -> Aval 
+data AvRel where
+  AvRelN :: State -> Val   -> AvRel 
+  AvRelV :: State -> Vname -> AvRel 
+  AvRelP :: State -> AExp -> Val -> AExp -> Val -> AvRel -> AvRel -> AvRel 
 
-{-@ data Aval where
-      AvalN :: s:_ -> n:_ -> Prop (Aval s (N n) n) 
-    | AvalV :: s:_ -> x:_ -> Prop (Aval s (V x) (S.get s x)) 
-    | AvalP :: s:_ -> a1:_ -> v1:_ -> a2:_ -> v2:_ 
-            -> Prop (Aval s a1 v1) 
-            -> Prop (Aval s a2 v2)
-            -> Prop (Aval s (Plus a1 a2) (add v1 v2))
+{-@ data AvRel where
+      AvRelN :: s:_ -> n:_ 
+            -> Prop (AvRel s (N n) n) 
+    | AvRelV :: s:_ -> x:_ 
+            -> Prop (AvRel s (V x) (S.get s x)) 
+    | AvRelP :: s:_ -> a1:_ -> v1:_ -> a2:_ -> v2:_ 
+            -> Prop (AvRel s a1 v1) 
+            -> Prop (AvRel s a2 v2)
+            -> Prop (AvRel s (Plus a1 a2) (add v1 v2))
   @-}
+
+{-@ lem_avrel :: s:_ -> a:_ -> n:_ -> Prop (AvRel s a n) 
+              -> { n == aval a s } @-}
+lem_avrel :: State -> AExp -> Val -> AvRel -> Proof 
+lem_avrel s (N n)        _n (AvRelN {}) 
+   = () 
+lem_avrel s (V x)        _  (AvRelV {}) 
+   = () 
+lem_avrel s (Plus a1 a2) _  (AvRelP _s _a1 n1 _a2 n2 p_a1_n1 p_a2_n2) 
+   =   lem_avrel s a1 n1 p_a1_n1 -- aval a1 s == n1 
+   &&& lem_avrel s a2 n2 p_a2_n2 -- aval a2 s == n2
+
+lem_avrel s _ _ _ = impossible "" 
+
+
+
+-- s:_ -> a:_ -> n:{ n = aval a s } -> Prop (AvRel s a n)
+
+
 
 {-@ reflect add @-}
 add :: Val -> Val -> Val
