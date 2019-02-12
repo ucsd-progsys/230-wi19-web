@@ -453,7 +453,7 @@ the `lem_subst`. The proof is left as an exercise (in the homework).
 
 \begin{code}
 {- lem_subst :: x:_ -> a:_ -> e:_ -> s:_ 
-          -> { aval e (set x (aval a s) s)  == aval (subst x a e) s @-}
+          -> { aval e (set x (aval a s)) s  == aval (subst x a e) s @-}
 \end{code}
 
 #### Where do we go from here?
