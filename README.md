@@ -58,10 +58,10 @@ There is **no text** for CSE 230, but we will be basing much of the material on:
 |      | **Proofs of Programs**  |                  |                                          |
 | 2.   | Programs  as Proofs     | [lhs](src/Week2) | Ch2 of Nipkow & Klein                    |
 | 3.   | Induction on Terms      | [lhs](src/Week3) | Ch3 of Nipkow & Klein		       |
-| 4.   | Induction on Evidence   |                  |                                          |
+| 4.   | Induction on Evidence   | [lhs](src/Week4) | Ch4 of Nipkow & Klein                    |
 |      |                         |                  |                                          |
 |      | **Proofs for Programs** |                  |                                          |
-| 5.   | Operational Semantics   |                  |                                          |
+| 5.   | Operational Semantics   | [lhs](src/Week5) | Ch7 of Nipkow & Klein                    |
 | 6.   | Axiomatic Semantics     |                  |                                          |
 | 7.   | Type Systems            |                  |                                          |
 |      |                         |                  |                                          |
