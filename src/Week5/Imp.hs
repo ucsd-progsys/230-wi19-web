@@ -11,7 +11,6 @@ module Imp where
 
 import           Prelude hiding ((++)) 
 import           ProofCombinators
-import           Lists 
 import qualified State as S
 import           Expressions hiding (And)
 
@@ -44,7 +43,7 @@ import           Expressions hiding (And)
   -------------------------------
     BStep (If b c1 c2) s s' 
 
-
+    WHILE 
  -}
 
 data Com 
@@ -141,6 +140,8 @@ step_1_2 s = BSeq cmd_1 cmd_2 s s1 s2 (step_1 s) (step_2 s1)
     s1     = S.set s  "x" 5 
     s2     = S.set s1 "y" 5
 
+-------------------------------------------------------------------------------
+-- step practice
 -------------------------------------------------------------------------------
 {-@ lemma_7_1_a :: c1:_ -> c2:_ -> c3:_ -> s:_ -> s3:_
       -> Prop (BStep (Seq (Seq c1 c2) c3) s s3)
@@ -296,10 +297,6 @@ lemma_7_9 s t t' (While b c)  (BWhileT _ _ _ s1 _ s_s1 s1_t) (BWhileT _ _ _ s1' 
 --------------------------------------------------------------------------------
 -- | Small-step Semantics 
 --------------------------------------------------------------------------------
-
-{-@ reflect asgn @-}
-asgn :: Vname -> AExp -> State -> State
-asgn x a s = S.set s x (aval a s)
 
 data SStepP where
   SStep :: Com -> State -> Com -> State -> SStepP 

@@ -32,6 +32,10 @@ aval (N n) _        = n
 aval (V x) s        = S.get s x 
 aval (Plus e1 e2) s = aval e1 s + aval e2 s
 
+{-@ reflect asgn @-}
+asgn :: Vname -> AExp -> State -> State
+asgn x a s = S.set s x (aval a s)
+
 --------------------------------------------------------------------------------
 -- | Boolean Expressions 
 --------------------------------------------------------------------------------
