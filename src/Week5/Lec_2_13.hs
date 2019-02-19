@@ -23,7 +23,6 @@ import           Expressions hiding (And)
     BStep c s1 s2 
 
 
-
   ------------------[BSkip]
     BStep Skip s s
 
