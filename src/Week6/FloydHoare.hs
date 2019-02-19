@@ -309,13 +309,20 @@ lem_seq c1 c2 p q r l1 l2 = \s s' (BSeq _ _ _ smid _ t1 t2) ->
   @-}
 lem_if :: BExp -> Com -> Com -> Assertion -> Assertion -> Legit -> Legit -> Legit
 lem_if b c1 c2 p q l1 l2 = \s s' bs -> case bs of 
-  BIfT _ _ _ _ _ c1_s_s' -> l1 s s' c1_s_s'
   BIfF _ _ _ _ _ c2_s_s' -> l2 s s' c2_s_s'
-
+  BIfT _ _ _ _ _ c1_s_s' -> l1 s s' c1_s_s'
 
 --------------------------------------------------------------------------------
 -- | Loops 
 --------------------------------------------------------------------------------
+{-@ lem_while :: b:_ -> c:_ -> p:_ 
+              -> Legit (bAnd p b) c p 
+              -> Legit p (While b c) (bAnd p (Not b)) 
+  @-}
+lem_while :: BExp -> Com -> Assertion -> Legit -> Legit 
+lem_while b c p lbody = \s s' bs -> case bs of 
+  BWhileF {} -> undefined 
+  BWhileT {} -> undefined 
 
 --------------------------------------------------------------------------------
 -- | Consequence
