@@ -18,7 +18,6 @@ import           Expressions
 import           Imp 
 import           BigStep hiding (And)
 
-
 --------------------------------------------------------------------------------
 {- | A Floyd-Hoare triple is of the form 
 
@@ -63,73 +62,6 @@ import           BigStep hiding (And)
 type Assertion = BExp 
 --------------------------------------------------------------------------------
 
-{- 
---------------------------------------------------------------------------------
--- | The type `Triple` formalizes the notion of a "Floyd-Hoare Triple"
---------------------------------------------------------------------------------
-
-data Triple = Triple 
-  Assertion     -- ^ Precondition (assertion on starting state)
-  Com           -- ^ Imp Command    
-  Assertion     -- ^ Postcondition  (assertion on final state)
- 
-{-@ measure pre @-}
-pre :: Triple -> Assertion
-pre (Triple p _ _) = p 
-
-{-@ measure post @-}
-post :: Triple -> Assertion
-post (Triple _ _ q) = q 
-
-{-@ measure com @-}
-com :: Triple -> Com 
-com (Triple _ c _) = c 
-
-{-@ type Legit T = s : {State | bval (pre T) s} 
-                 -> s': _ 
-                 -> Prop (BStep (com T) s s') 
-                 -> {bval (post T) s'}  
-  @-}
-type Legit = State -> State -> BStep -> Proof 
-
-{-@ leg1 :: Legit tr1 @-}
-
-
---------------------------------------------------------------------------------
--- | Example: {True}  X <~ 5  {X = 5} 
---------------------------------------------------------------------------------
-{-@ reflect tr1 @-} 
-tr1 :: Triple
-tr1 = Triple
-  tt 
-    ("x" <~ N 5) 
-  ((V "x") .==. (N 5)) 
-
---------------------------------------------------------------------------------
--- | Example: {True}  X <~ 5; y <- X  {X = 5} 
---------------------------------------------------------------------------------
-
-{-@ reflect tr3 @-} 
-tr3 :: Triple
-tr3 = Triple
-  tt 
-    (("x" <~ N 5) @@ 
-     ("y" <~ V "x"))
-  ((V "y") .==. (N 5)) 
-
---------------------------------------------------------------------------------
--- | Example: {X = 2 && X = 3}  X <~ 5  {X = 0}
---------------------------------------------------------------------------------
-
-{-@ reflect tr5 @-} 
-tr5 :: Triple
-tr5 = Triple
-  (((V "x") .==. (N 2)) .&&. ((V "x") .==. (N 3))) 
-    (("x" <~ N 5) @@ 
-     ("y" <~ V "x"))
-  ((V "x") .==. (N 0)) 
-
--} 
 --------------------------------------------------------------------------------
 {- | Legitimate Triples 
 --------------------------------------------------------------------------------
@@ -186,7 +118,10 @@ Which of the following triples are "legit" i.e.,  the claimed relation between
 --------------------------------------------------------------------------------
 -- | `Legit` formalizes the notion of when a Floyd-Hoare triple is legitimate 
 --------------------------------------------------------------------------------
-{-@ type Legit P C Q = s:{State | bval P s} -> s':_ -> Prop (BStep C s s') -> {bval Q s'} @-}
+{-@ type Legit P C Q =  s:{State | bval P s} 
+                     -> s':_ -> Prop (BStep C s s') 
+                     -> {bval Q s'} 
+  @-}
 type Legit = State -> State -> BStep -> Proof 
 
 -- | {True}  X <~ 5  {X = 5} ---------------------------------------------------
@@ -321,8 +256,15 @@ lem_if b c1 c2 p q l1 l2 = \s s' bs -> case bs of
   @-}
 lem_while :: BExp -> Com -> Assertion -> Legit -> Legit 
 lem_while b c p lbody = \s s' bs -> case bs of 
-  BWhileF {} -> undefined 
-  BWhileT {} -> undefined 
+  -- s' = s and the BWhileF "says" not (bval b s) 
+  BWhileF {} -> 
+    ()          
+
+  -- s --c--> s_mid --w--> s'
+  -- lbody s s_mid c_s_smid :: bval p smid 
+  -- lem_while b c p lbody smid s' w_smid_s' :: RESULT
+  BWhileT _ _ _ smid _ c_s_smid w_smid_s' -> 
+    lem_while b c p lbody (smid ? lbody s smid c_s_smid) s' w_smid_s' 
 
 --------------------------------------------------------------------------------
 -- | Consequence
@@ -349,56 +291,124 @@ lem_conseq_post p q q' c pcq impl = \s s' c_s_s' -> pcq s s' c_s_s' ? (impl s')
 {-@ type Valid P = s:State -> { v: Proof | bval P s } @-}
 type Valid = State -> Proof 
 
+--------------------------------------------------------------------------------
+-- | When does an assertion `Imply` another
+--------------------------------------------------------------------------------
+
 {-@ type Imply P Q = Valid (bImp P Q) @-}
 
 {-@ v1 :: _ -> Imply (Leq (N 10) (V {"x"})) (Leq (N 5) (V {"x"})) @-} 
 v1 :: a -> Valid 
 v1 _ = \_ -> ()
 
-
-{- 
-{-@ v2 :: Valid p2 @-}
-v2 :: Valid 
-v2 = \_ -> ()
-
 -- (0 < x && 0 < y) ===> (0 < x + y)
-{-@ reflect p2 @-}
-p2 = ((N 0) `Less` (V "x")) `bAnd` ((N 0) `Less` (V "y")) 
-       `bImp` ((N 0) `Less` (Plus (V "x") (V "y")))
-       
-P => P'   {P'} c {Q'}     Q' => Q
-------------------------------------
-          {P}  c {Q}
+
+{-@ v2 :: _ -> Imply (bAnd (Leq (N 0) (V {"x"})) (Leq (N 0) (V {"y"}))) 
+                     (Leq (N 0) (Plus (V {"x"}) (V {"y"})))
+  @-}             
+v2 :: a -> Valid 
+v2 _ = \_ -> ()
+
+--------------------------------------------------------------------------------
+-- | The Floyd-Hoare proof system
+--------------------------------------------------------------------------------
 
 data FHP where 
   FH :: Assertion -> Com -> Assertion -> FHP
 
 data FH where 
-  FHSkip   :: Assertion -> FH 
-  FHAssign :: Assertion -> Vname -> AExp -> FH 
-  FHSeq    :: Assertion -> Com -> Assertion -> Com -> Assertion -> FH -> FH -> FH 
-  FHIf     :: Assertion -> Assertion -> BExp -> Com -> Com -> FH -> FH -> FH
-  FHWhile  :: Assertion -> BExp -> Com -> FH -> FH 
-  FHConseq :: Assertion -> Assertion -> Assertion -> Assertion -> Com -> FH -> FH 
+  FHSkip    :: Assertion -> FH 
+  FHAssign  :: Assertion -> Vname -> AExp -> FH 
+  FHSeq     :: Assertion -> Com -> Assertion -> Com -> Assertion -> FH -> FH -> FH 
+  FHIf      :: Assertion -> Assertion -> BExp -> Com -> Com -> FH -> FH -> FH
+  FHWhile   :: Assertion -> BExp -> Com -> FH -> FH 
+  FHConPre  :: Assertion -> Assertion -> Assertion -> Com -> Valid -> FH -> FH 
+  FHConPost :: Assertion -> Assertion -> Assertion -> Com -> FH -> Valid -> FH 
 
 {-@ data FH where 
-      FHSkip   :: p:Assertion 
+      FHSkip   :: p:_
                -> Prop (FH p Skip p) 
-    | FHAssign :: q:Assertion -> x:Vname -> a:AExp 
-               -> Prop (FH (subst q x a) (Assign x a) q) 
-    | FHSeq    :: p:Assertion -> c1:Com -> q:Assertion -> c2:Com -> r:Assertion 
-               -> Prop (FH p c1 q) -> Prop (FH q c2 r) 
+    | FHAssign :: q:_ -> x:_ -> a:_
+               -> Prop (FH (bsubst x a q) (Assign x a) q) 
+    | FHSeq    :: p:_ -> c1:_ -> q:_ -> c2:_ -> r:_ 
+               -> Prop (FH p c1 q) 
+               -> Prop (FH q c2 r) 
                -> Prop (FH p (Seq c1 c2) r) 
-    | FHIf     :: p:Assertion -> q:Assertion -> b:BExp -> c1:Com -> c2:Com 
-               -> Prop (FH (And p b)        c1 q) 
-               -> Prop (FH (And p (Not b))) c2 q)
+    | FHIf     :: p:_ -> q:_ -> b:_ -> c1:_ -> c2:_
+               -> Prop (FH (bAnd p b)       c1 q) 
+               -> Prop (FH (bAnd p (Not b)) c2 q)
                -> Prop (FH p (If b c1 c2) q)
-    | FHWhile  :: p:Assertion -> b:BExp -> c:Com
-               -> Prop (FH (And p b) c p) 
-               -> Prop (FH p (While b c) (And p (Not b)))
-    | FHConseq :: p:Assertion -> p':{Assertion | implies p p'} -> q':Assertion -> q:{Assertion | implies q' q} -> c:Com
-               -> Prop (FH p' c q') 
-               -> Prop (FH p  c q)
+    | FHWhile  :: p:_ -> b:_ -> c:_
+               -> Prop (FH (bAnd p b) c p) 
+               -> Prop (FH p (While b c) (bAnd p (Not b)))
+    | FHConPre :: p':_ -> p:_ -> q:_ -> c:_  
+               -> Imply p' p
+               -> Prop (FH p c q) 
+               -> Prop (FH p' c q)
+    | FHConPost :: p:_ -> q:_ -> q':_ -> c:_  
+                -> Prop (FH p c q) 
+                -> Imply q q'
+                -> Prop (FH p c q')
   @-}
+
+--------------------------------------------------------------------------------
+-- | THEOREM: Soundness of Floyd-Hoare Logic 
+--------------------------------------------------------------------------------
+
+{-@ thm_fh_legit :: p:_ -> c:_ -> q:_ -> Prop (FH p c q) -> Legit p c q @-}
+thm_fh_legit :: Assertion -> Com -> Assertion -> FH -> Legit 
+thm_fh_legit p _ _ (FHSkip {})      
+  = lem_skip p
+
+thm_fh_legit _ _ q (FHAssign _ x a) 
+  = lem_asgn x a q 
+
+thm_fh_legit _ _ _ (FHSeq p c1 q c2 r p_c1_q q_c2_r) 
+  = lem_seq c1 c2 p q r l1 l2 
+  where 
+    l1 = thm_fh_legit p c1 q p_c1_q 
+    l2 = thm_fh_legit q c2 r q_c2_r
+
+thm_fh_legit _ _ _ (FHIf p q b c1 c2 fh_c1 fh_c2)
+  = lem_if b c1 c2 p q l1 l2 
+  where 
+    l1 = thm_fh_legit (bAnd p b)       c1 q fh_c1 
+    l2 = thm_fh_legit (bAnd p (Not b)) c2 q fh_c2 
+
+thm_fh_legit _ _ _ (FHWhile p b c p_c_p) 
+  = lem_while b c p lw 
+  where 
+    lw = thm_fh_legit (bAnd p b) c p p_c_p
+
+thm_fh_legit _ _ _ (FHConPre p' p q c p'_imp_p p_c_q)
+  = lem_conseq_pre p' p q c p'_imp_p lc 
+  where 
+    lc = thm_fh_legit p c q p_c_q
+
+thm_fh_legit _ _ _ (FHConPost p q q' c p_c_q q_imp_q')
+  = lem_conseq_post p q q' c lc q_imp_q' 
+  where 
+    lc = thm_fh_legit p c q p_c_q
+
+
+--------------------------------------------------------------------------------
+-- | Verification Conditions 
+--------------------------------------------------------------------------------
+
+{- 
+
+data ICom = Com + Invariants 
+
+vc :: ICom -> Assertion -> Assertion
+
+pre :: ICom -> Assertion -> Assertion 
+
+-- Soundness of pre and vc 
+
+lem_vc :: c:ICom -> q:Assertion -> Valid (vc c q) -> FH (pre c q) (strip c) q
+
+-- Soundness of pre and vc 
+
+thm_vc :: c:ICom -> q:Assertion -> Valid (vc c q) -> Legit (pre c q) (strip c) q
 
 -}

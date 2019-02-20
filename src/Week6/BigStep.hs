@@ -59,7 +59,7 @@ data BStep where
   BWhileF :: BExp  -> Com  -> State -> BStep 
   BWhileT :: BExp  -> Com  -> State -> State -> State -> BStep -> BStep -> BStep 
 
-{-@ data BStep [stepSize] where 
+{-@ data BStep  where 
       BSkip   :: s:State 
               -> Prop (BStep Skip s s)
     | BAssign :: x:Vname -> a:AExp -> s:State 
@@ -77,17 +77,6 @@ data BStep where
               -> Prop (BStep c s1 s1') -> Prop (BStep (While b c) s1' s2)
               -> Prop (BStep (While b c) s1 s2)
   @-}  
-
-{-@ measure stepSize @-}
-{-@ stepSize :: BStep -> Nat @-}
-stepSize :: BStep -> Int 
-stepSize (BSkip {})                = 0 
-stepSize (BAssign {})              = 0 
-stepSize (BSeq _ _ _ _ _ s1 s2)    = 1 + stepSize s1 + stepSize s2 
-stepSize (BIfT _ _ _ _ _ s)        = 1 + stepSize s
-stepSize (BIfF _ _ _ _ _ s)        = 1 + stepSize s
-stepSize (BWhileF {})              = 0 
-stepSize (BWhileT _ _ _ _ _ s1 s2) = 1 + stepSize s1 + stepSize s2  
 
 --------------------------------------------------------------------------------
 
