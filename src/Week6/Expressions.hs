@@ -67,9 +67,17 @@ data BExp
 (.&&.) :: BExp -> BExp -> BExp 
 b1 .&&. b2 = And b1 b2 
 
+{-@ reflect .=>. @-}
+(.=>.) :: BExp -> BExp -> BExp 
+b1 .=>. b2 = bImp b1 b2 
+
 {-@ reflect bAnd @-}
 bAnd :: BExp -> BExp -> BExp 
 bAnd b1 b2 = And b1 b2 
+
+{-@ reflect bIte @-}
+bIte :: BExp -> BExp -> BExp -> BExp 
+bIte p b1 b2 = And (bImp p b1) (bImp (Not p) b2)
 
 {-@ reflect .==. @-}
 (.==.) :: AExp -> AExp -> BExp 

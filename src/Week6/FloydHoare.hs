@@ -255,16 +255,10 @@ lem_if b c1 c2 p q l1 l2 = \s s' bs -> case bs of
               -> Legit p (While b c) (bAnd p (Not b)) 
   @-}
 lem_while :: BExp -> Com -> Assertion -> Legit -> Legit 
-lem_while b c p lbody = \s s' bs -> case bs of 
-  -- s' = s and the BWhileF "says" not (bval b s) 
-  BWhileF {} -> 
-    ()          
-
-  -- s --c--> s_mid --w--> s'
-  -- lbody s s_mid c_s_smid :: bval p smid 
-  -- lem_while b c p lbody smid s' w_smid_s' :: RESULT
-  BWhileT _ _ _ smid _ c_s_smid w_smid_s' -> 
-    lem_while b c p lbody (smid ? lbody s smid c_s_smid) s' w_smid_s' 
+lem_while b c p lbody s s' (BWhileF {}) 
+  = ()
+lem_while b c p lbody s s' (BWhileT _ _ _ smid _ c_s_smid w_smid_s') 
+  = lem_while b c p lbody (smid ? lbody s smid c_s_smid) s' w_smid_s' 
 
 --------------------------------------------------------------------------------
 -- | Consequence
@@ -394,21 +388,121 @@ thm_fh_legit _ _ _ (FHConPost p q q' c p_c_q q_imp_q')
 --------------------------------------------------------------------------------
 -- | Verification Conditions 
 --------------------------------------------------------------------------------
+data ICom 
+  = ISkip                      -- skip 
+  | IAssign Vname AExp         -- x := a
+  | ISeq    ICom  ICom         -- c1; c2
+  | IIf     BExp  ICom  ICom   -- if b then c1 else c2
+  | IWhile  BExp  BExp  ICom   -- while {I} b c 
+  deriving (Show)
+
+{-@ reflect pre @-}
+pre :: ICom -> Assertion -> Assertion 
+pre ISkip          q = q
+pre (IAssign x a)  q = bsubst x a q 
+pre (ISeq c1 c2)   q = pre c1 (pre c2 q)
+pre (IIf b c1 c2)  q = bIte b (pre c1 q) (pre c2 q) 
+pre (IWhile i _ _) _ = i 
+
+{-@ reflect vc @-}
+vc :: ICom -> Assertion -> Assertion
+vc ISkip          _ = tt 
+vc (IAssign {})   _ = tt 
+vc (ISeq c1 c2)   q = (vc c1 (pre c2 q)) `bAnd` (vc c2 q)
+vc (IIf _ c1 c2)  q = (vc c1 q) `bAnd` (vc c2 q)
+vc (IWhile i b c) q = ((bAnd i b)       `bImp` (pre c i)) `bAnd` 
+                      ((bAnd i (Not b)) `bImp` q        ) `bAnd`
+                      vc c i
+
+{-@ reflect strip @-}
+strip :: ICom -> Com 
+strip ISkip          = Skip 
+strip (IAssign x a)  = Assign x a 
+strip (ISeq c1 c2)   = Seq (strip c1) (strip c2)
+strip (IIf b c1 c2)  = If b (strip c1) (strip c2)
+strip (IWhile _ b c) = While b (strip c)
+
+{-@ lem_vc :: c:_ -> q:_ -> Valid (vc c q) -> Prop (FH (pre c q) (strip c) q) @-}
+lem_vc :: ICom -> Assertion -> Valid -> FH 
+
+lem_vc ISkip          q _ = FHSkip q
+
+lem_vc (IAssign x a)  q _ = FHAssign q x a 
+
+lem_vc (ISeq c1 c2)   r v = FHSeq p (strip c1) q (strip c2) r (lem_vc c1 q v) (lem_vc c2 r v) 
+  where 
+    p                     = pre c1 q
+    q                     = pre c2 r
 
 {- 
 
-data ICom = Com + Invariants 
 
-vc :: ICom -> Assertion -> Assertion
+ -}
 
-pre :: ICom -> Assertion -> Assertion 
+lem_vc (IIf b c1 c2)  q v = FHIf p q b (strip c1) (strip c2) pb_c1_q pnotb_c2_q 
+  where 
+    p                     = bIte b p1 p2 
+    p1                    = pre c1 q 
+    p2                    = pre c2 q 
+    p1_c1_q               = lem_vc c1 q v 
+    p2_c2_q               = lem_vc c2 q v 
+    pb_c1_q               = FHConPre (bAnd p b)       p1 q (strip c1) v1 p1_c1_q
+    pnotb_c2_q            = FHConPre (bAnd p (Not b)) p2 q (strip c2) v2 p2_c2_q
+    v1                    = lem_valid_imp  b p1 p2
+    v2                    = lem_valid_imp' b p1 p2
 
+{- let p1 = pre c1 q 
+       p2 = pre c2 q 
+       p  = bIte b p1 p2 
+       
+    [lem_valid]    [lem_vc c1 q v]              [lem_valid]      [lem_vc c2 q v]
+    -------------  ----------------             --------------   ---------------- 
+    |- p&b => p1   |- {p1} c1 {q}               |- p&!b => p2    |- {p2} c2 {q}
+    ------------------------------ [FHConPre]   ------------------------------ [FHConPre]
+    |- {p&b} c1 {q}                             |- {p&!b} c2 {q}
+    ------------------------------------------------------------- [FHIf]
+    |- { p } If b c1 c2 { q }
+ -}
+
+lem_vc (IWhile i b c) q v = i_w_q
+  where
+    c_        = strip c 
+    ib_c_i    = FHConPre (bAnd i b) (pre c i) i c_ v (lem_vc c i v)
+    i_w_inotb = FHWhile i b c_ ib_c_i
+    i_w_q     = FHConPost i (bAnd i (Not b)) q (While b c_) i_w_inotb v 
+
+
+{- 
+
+    ---------------------- [v]   ------------------- [lem_vc c i v]
+    |- (i & b) => pre c i        |- {pre c i} c {i}
+    ------------------------------------------------ [FHConPre] 
+    |- {i & b} c {i}
+    -------------------------- [FHWhile]    ---------------- [v]
+    |- {i} while b c {i & ~b}               |- (i & ~b) => q 
+    -------------------------------------------------------- [FHConPost]
+    |- {i} while b c {q} 
+
+    c_        = strip c 
+    ib_c_i    = FHConPre (bAnd i b) (pre c i) i c_ v (lem_vc c i v)
+    i_w_inotb = FHWhile i b c_ ib_c_i
+    i_w_q     = FHConPost i (bAnd i (Not b)) (While b c_) v 
+
+ -}
+
+
+{-@ lem_valid_imp :: b:_ -> p1:_ -> p2:_ -> (Imply (bAnd (bIte b p1 p2) b) p1) @-}
+lem_valid_imp :: BExp -> BExp -> BExp -> Valid 
+lem_valid_imp b p1 p2 = \_ -> () 
+
+{-@ lem_valid_imp' :: b:_ -> p1:_ -> p2:_ -> (Imply (bAnd (bIte b p1 p2) (Not b)) p2) @-}
+lem_valid_imp' :: BExp -> BExp -> BExp -> Valid 
+lem_valid_imp' b p1 p2 = \_ -> () 
+
+
+-- TODO
 -- Soundness of pre and vc 
+-- thm_vc :: c:ICom -> q:Assertion -> Valid (vc c q) -> Legit (pre c q) (strip c) q
 
-lem_vc :: c:ICom -> q:Assertion -> Valid (vc c q) -> FH (pre c q) (strip c) q
-
--- Soundness of pre and vc 
-
-thm_vc :: c:ICom -> q:Assertion -> Valid (vc c q) -> Legit (pre c q) (strip c) q
-
--}
+-- bval (bImp (bAnd (bIte b (pre c1 q) (pre c2 q)) b) (pre c1 q)) ?b
+-- bval (bImp (bAnd (bIte b p1 p2) b) p1) ?b
