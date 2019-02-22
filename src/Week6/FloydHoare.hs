@@ -1,7 +1,7 @@
 {-@ LIQUID "--reflection"  @-}
-{-@ LIQUID "--diff"        @-}
 {-@ LIQUID "--ple"         @-}
-{-@ LIQUID "--short-names" @-}
+{-@ LIQUID "--diff"        @-}
+{- LIQUID "--short-names" @-}
 {-@ infixr ++              @-}  -- TODO: Silly to have to rewrite this annotation!
 {-@ infixr <~              @-}  -- TODO: Silly to have to rewrite this annotation!
 
@@ -429,27 +429,21 @@ lem_vc ISkip          q _ = FHSkip q
 
 lem_vc (IAssign x a)  q _ = FHAssign q x a 
 
+{- let p = pre c1 q 
+       q = pre c2 r
+    
+    [lem_vc c1 q v]  [lem_vc c2 r v]
+    ---------------  ----------------
+    |- {p} c1 {q}    |- {q} c2 {r}
+    ---------------------------------[FHSeq]
+    |- {p} c1;c2 {r}
+
+ -}
+
 lem_vc (ISeq c1 c2)   r v = FHSeq p (strip c1) q (strip c2) r (lem_vc c1 q v) (lem_vc c2 r v) 
   where 
     p                     = pre c1 q
     q                     = pre c2 r
-
-{- 
-
-
- -}
-
-lem_vc (IIf b c1 c2)  q v = FHIf p q b (strip c1) (strip c2) pb_c1_q pnotb_c2_q 
-  where 
-    p                     = bIte b p1 p2 
-    p1                    = pre c1 q 
-    p2                    = pre c2 q 
-    p1_c1_q               = lem_vc c1 q v 
-    p2_c2_q               = lem_vc c2 q v 
-    pb_c1_q               = FHConPre (bAnd p b)       p1 q (strip c1) v1 p1_c1_q
-    pnotb_c2_q            = FHConPre (bAnd p (Not b)) p2 q (strip c2) v2 p2_c2_q
-    v1                    = lem_valid_imp  b p1 p2
-    v2                    = lem_valid_imp' b p1 p2
 
 {- let p1 = pre c1 q 
        p2 = pre c2 q 
@@ -464,13 +458,18 @@ lem_vc (IIf b c1 c2)  q v = FHIf p q b (strip c1) (strip c2) pb_c1_q pnotb_c2_q
     |- { p } If b c1 c2 { q }
  -}
 
-lem_vc (IWhile i b c) q v = i_w_q
-  where
-    c_        = strip c 
-    ib_c_i    = FHConPre (bAnd i b) (pre c i) i c_ v (lem_vc c i v)
-    i_w_inotb = FHWhile i b c_ ib_c_i
-    i_w_q     = FHConPost i (bAnd i (Not b)) q (While b c_) i_w_inotb v 
 
+lem_vc (IIf b c1 c2)  q v = FHIf p q b (strip c1) (strip c2) pb_c1_q pnotb_c2_q 
+  where 
+    p                     = bIte b p1 p2 
+    p1                    = pre c1 q 
+    p2                    = pre c2 q 
+    p1_c1_q               = lem_vc c1 q v 
+    p2_c2_q               = lem_vc c2 q v 
+    pb_c1_q               = FHConPre (bAnd p b)       p1 q (strip c1) v1 p1_c1_q
+    pnotb_c2_q            = FHConPre (bAnd p (Not b)) p2 q (strip c2) v2 p2_c2_q
+    v1                    = lem_valid_imp  b p1 p2
+    v2                    = lem_valid_imp' b p1 p2
 
 {- 
 
@@ -490,6 +489,14 @@ lem_vc (IWhile i b c) q v = i_w_q
 
  -}
 
+lem_vc (IWhile i b c) q v = i_w_q
+  where
+    c_        = strip c 
+    ib_c_i    = FHConPre (bAnd i b) (pre c i) i c_ v (lem_vc c i v)
+    i_w_inotb = FHWhile i b c_ ib_c_i
+    i_w_q     = FHConPost i (bAnd i (Not b)) q (While b c_) i_w_inotb v 
+
+-- Not sure why we need to spell this out? 
 
 {-@ lem_valid_imp :: b:_ -> p1:_ -> p2:_ -> (Imply (bAnd (bIte b p1 p2) b) p1) @-}
 lem_valid_imp :: BExp -> BExp -> BExp -> Valid 
@@ -499,10 +506,36 @@ lem_valid_imp b p1 p2 = \_ -> ()
 lem_valid_imp' :: BExp -> BExp -> BExp -> Valid 
 lem_valid_imp' b p1 p2 = \_ -> () 
 
+-----------------------------------------------------------------------------------
+-- | Punchline: Soundness of VC 
+-----------------------------------------------------------------------------------
 
--- TODO
--- Soundness of pre and vc 
--- thm_vc :: c:ICom -> q:Assertion -> Valid (vc c q) -> Legit (pre c q) (strip c) q
+{-@ thm_vc :: c:_ -> q:_ -> Valid (vc c q) -> Legit (pre c q) (strip c) q @-}
+thm_vc :: ICom -> Assertion -> Valid -> Legit 
+thm_vc c q v = thm_fh_legit (pre c q) (strip c) q (lem_vc c q v) 
 
--- bval (bImp (bAnd (bIte b (pre c1 q) (pre c2 q)) b) (pre c1 q)) ?b
--- bval (bImp (bAnd (bIte b p1 p2) b) p1) ?b
+
+-----------------------------------------------------------------------------------
+-- | Extending the above to triples [HW] 
+-----------------------------------------------------------------------------------
+
+{-@ reflect vc' @-}
+vc' :: Assertion -> ICom -> Assertion -> Assertion 
+vc' p c q = bAnd (bImp p (pre c q)) (vc c q) 
+
+{- 
+   [v]                 [lem_vc c q v]
+   ---------------     ------------------
+   |- p => pre c q     |- {pre c q} c {q} 
+   -------------------------------------- [FHConPre]
+   |- {p} c {q}
+
+ -}
+{-@ lem_vc' :: p:_ -> c:_ -> q:_ -> Valid (vc' p c q) -> Prop (FH p (strip c) q) @-}
+lem_vc' :: Assertion -> ICom -> Assertion -> Valid -> FH 
+lem_vc' p c q v = FHConPre p (pre c q) q (strip c) v (lem_vc c q v) 
+
+{-@ thm_vc' :: p:_ -> c:_ -> q:_ -> Valid (vc' p c q) -> Legit p (strip c) q @-}
+thm_vc' :: Assertion -> ICom -> Assertion -> Valid -> Legit 
+thm_vc' p c q v = thm_fh_legit p (strip c) q (lem_vc' p c q v) 
+

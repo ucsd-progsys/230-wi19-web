@@ -34,8 +34,3 @@ x <~ a = Assign x a
 (@@) :: Com -> Com -> Com 
 s1 @@ s2 = Seq s1 s2
 
--- x = y + 1; y = 2
-ex_7_1 :: () ->Com 
-ex_7_1 _ = ("x" <~ Plus (V "y") (N 1))  @@ 
-           ("y" <~ N 2)                 @@ 
-           Skip 

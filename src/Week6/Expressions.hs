@@ -17,7 +17,9 @@ type Vname = String
 data AExp  
   = N Val 
   | V Vname 
-  | Plus AExp AExp 
+  | Plus  AExp AExp 
+  | Minus AExp AExp 
+  | Times AExp AExp 
   deriving (Show)
 
 type Val   = Int 
@@ -25,9 +27,11 @@ type State = S.GState Vname Val
 
 {-@ reflect aval @-}
 aval                :: AExp -> State -> Val 
-aval (N n) _        = n 
-aval (V x) s        = S.get s x 
-aval (Plus e1 e2) s = aval e1 s + aval e2 s
+aval (N n) _         = n 
+aval (V x) s         = S.get s x 
+aval (Plus  e1 e2) s = aval e1 s + aval e2 s
+aval (Minus e1 e2) s = aval e1 s - aval e2 s
+aval (Times e1 e2) s = aval e1 s * aval e2 s
 
 {-@ reflect asgn @-}
 asgn :: Vname -> AExp -> State -> State
@@ -35,7 +39,9 @@ asgn x a s = S.set s x (aval a s)
 
 {-@ reflect subst @-}
 subst :: Vname -> AExp -> AExp -> AExp
-subst x e (Plus a1 a2)   = Plus (subst x e a1) (subst x e a2)
+subst x e (Plus  a1 a2)  = Plus  (subst x e a1) (subst x e a2)
+subst x e (Minus a1 a2)  = Minus (subst x e a1) (subst x e a2)
+subst x e (Times a1 a2)  = Times (subst x e a1) (subst x e a2)
 subst x e (V y) | x == y = e
 subst _ _ a              = a
 
@@ -44,10 +50,12 @@ subst _ _ a              = a
   @-}
 lem_subst :: Vname -> AExp -> AExp -> State -> Proof
 lem_subst x a (V y) s
-  | x == y                   = ()
-  | otherwise                = S.lemma_get_not_set y x (aval a s) s
-lem_subst x a (N i) s        = ()
-lem_subst x a (Plus e1 e2) s = lem_subst x a e1 s &&& lem_subst x a e2 s
+  | x == y                    = ()
+  | otherwise                 = S.lemma_get_not_set y x (aval a s) s
+lem_subst x a (N i) s         = ()
+lem_subst x a (Plus  e1 e2) s = lem_subst x a e1 s &&& lem_subst x a e2 s
+lem_subst x a (Minus e1 e2) s = lem_subst x a e1 s &&& lem_subst x a e2 s
+lem_subst x a (Times e1 e2) s = lem_subst x a e1 s &&& lem_subst x a e2 s
 
 
 

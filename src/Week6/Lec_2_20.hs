@@ -209,6 +209,7 @@ step_1_2 s = BSeq cmd_1 cmd_2 s s1 s2 (step_1 s) (step_2 s1)
     s1     = S.set s  "x" 5 
     s2     = S.set s1 "y" 5
 
+{- 
 {-@ lem_semi :: c1:_ -> c2:_ -> c3:_ -> s:_ -> s3:_
       -> Prop (BStep (Seq (Seq c1 c2) c3) s s3)
       -> Prop (BStep (Seq c1 (Seq c2 c3)) s s3) 
@@ -217,3 +218,4 @@ lem_semi :: Com -> Com -> Com -> State -> State -> _ -> _
 lem_semi _ _ _ s s3 (BSeq c12 c3 _ s2 _ (BSeq c1 c2 _ s1 _  bs1 bs2) bs3) 
   = BSeq c1 (Seq c2 c3) s s1 s3 bs1 (BSeq c2 c3 s1 s2 s3 bs2 bs3)
 
+-}

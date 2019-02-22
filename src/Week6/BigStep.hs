@@ -112,6 +112,7 @@ step_1_2 s = BSeq cmd_1 cmd_2 s s1 s2 (step_1 s) (step_2 s1)
       -> Prop (BStep (Seq c1 (Seq c2 c3)) s s3) 
   @-}
 lemma_7_1_a :: Com -> Com -> Com -> State -> State -> BStep -> BStep 
+
 lemma_7_1_a _ _ _ s s3 (BSeq c12 c3 _ s2 _ (BSeq c1 c2 _ s1 _  bs1 bs2) bs3) 
   = BSeq c1 (Seq c2 c3) s s1 s3 bs1 (BSeq c2 c3 s1 s2 s3 bs2 bs3)
 
