@@ -5,7 +5,11 @@
 {-@ infixr ++              @-}  -- TODO: Silly to have to rewrite this annotation!
 {-@ infixr <~              @-}  -- TODO: Silly to have to rewrite this annotation!
 
--- | Inspired by http://flint.cs.yale.edu/cs428/coq/sf/Hoare.html 
+--------------------------------------------------------------------------------
+-- | Inspired by 
+--     http://flint.cs.yale.edu/cs428/coq/sf/Hoare.html
+--     http://flint.cs.yale.edu/cs428/coq/sf/Hoare2.html
+--------------------------------------------------------------------------------
 
 {-# LANGUAGE GADTs #-}
 
