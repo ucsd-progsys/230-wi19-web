@@ -1,8 +1,8 @@
 {-@ LIQUID "--reflection"  @-}
 {-@ LIQUID "--ple"         @-}
-{- LIQUID "--diff"        @-}
+{-@ LIQUID "--diff"        @-}
 
-module Verification () where 
+module Verifier () where 
 
 import           ProofCombinators
 import qualified State as S
@@ -103,6 +103,7 @@ ex10 _ = verify p c q (\_ -> ())
           (IAssign "x" (Plus (V "x") (N 1)))   --     x := x + 1
     q = Equal (V "x") (N 100)                  -- { x = 100 } 
     i = undefined -- TODO: In class
+-}
 
 ----------------------------------------------------------------
 {- Example 1: branching -}
@@ -114,9 +115,8 @@ bx1 _ = verify p c q (\_ -> ())
     c = IIf (Equal (V "x") (N 0))              --   IF x == 0 
             (IAssign "y" (N 2))                --     THEN y := 2
             (IAssign "y" (Plus (V "x") (N 1))) --     ELSE y := x + 1
-    q = Leq (V "y") (V "x")                    -- { x <= y } 
+    q = Leq (V "x") (V "y")                    -- { x <= y } 
 
--}
 ----------------------------------------------------------------
 {- Example 2: Swapping Using Addition and Subtraction -} 
 
@@ -130,6 +130,19 @@ bx2 _ = verify p c q (\_ -> ())
       `ISeq` IAssign "x" (Minus (V "x") (V "y"))  --     x := x - y
     q =      (V "x" `Equal` V "b")                -- { x = a && y = b } 
       `bAnd` (V "y" `Equal` V "a") 
+
+
+----------------------------------------------------------------
+{- Example 3: Reduce to Zero -} 
+
+bx3 :: () -> () 
+bx3 _ = verify p c q (\_ -> ()) 
+  where 
+    p = tt                                      -- { true } 
+    c = IWhile i (Not (Equal (V "x") (N 0)))    --   WHILE not (x == 0) DO: 
+          (IAssign "x" (Minus (V "x") (N 1)))   --     x := x - 1
+    q = (V "x" `Equal` N 0)                     -- { x = 0 } 
+    i = tt 
 
 {- Example 3: Absolute value 
 
@@ -193,5 +206,31 @@ bx2 _ = verify p c q (\_ -> ())
    Y ::= Y + 1
  END
    { Z = m * m } 
+
+ -}
+
+
+{- 
+
+ 1. Define IMP language
+    https://github.com/ucsd-progsys/230-wi19-web/blob/master/src/Week6/Imp.hs#L21-L27
+
+ 2. Define Big-Step semantics 
+    https://github.com/ucsd-progsys/230-wi19-web/blob/master/src/Week6/BigStep.hs#L62-L79
+
+ 3. Define Verification Conditions (VC)
+    https://github.com/ucsd-progsys/230-wi19-web/blob/master/src/Week6/FloydHoare.hs#L399-L415
+
+ 4. Prove VC is sound w.r.t. big-step semantics 
+    https://github.com/ucsd-progsys/230-wi19-web/blob/master/src/Week6/FloydHoare.hs#L538-L540
+
+ 5. Use PLE to get automatic & verified SMT-based verifier for IMP
+    https://github.com/ucsd-progsys/230-wi19-web/blob/master/src/Week6/Verifier.hs#L24-L26
+    
+    for example:
+    https://github.com/ucsd-progsys/230-wi19-web/blob/master/src/Week6/Verifier.hs#L138-L145 
+
+    compare to coq proof:
+
 
  -}
