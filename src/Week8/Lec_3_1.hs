@@ -7,7 +7,7 @@
 
 {-# LANGUAGE GADTs #-}
 
-module Lec_2_27 where
+module Lec_3_1 where
 
 import           Prelude hiding ((++)) 
 import           ProofCombinators
@@ -103,6 +103,88 @@ lem_not_skip c c' s s' (SIfT {})    = ()
 lem_not_skip c c' s s' (SIfF {})    = () 
 lem_not_skip c c' s s' (SWhileF {}) = () 
 lem_not_skip c c' s s' (SWhileT {}) = () 
+
+
+----------------------------------------------------------------------------------
+
+{-@ lem_ss_det :: c:_ -> s:_ -> c1:_ -> s1:_ -> c2:_ -> s2:_ 
+   -> Prop (SStep c s c1 s1) 
+   -> Prop (SStep c s c2 s2) 
+   -> { c1 = c2  && s1 = s2 } 
+  @-}
+
+lem_ss_det :: Com -> State -> Com -> State -> Com -> State 
+   -> SStepProof 
+   -> SStepProof 
+   -> Proof 
+
+lem_ss_det c s c1 s1 c2 s2 
+  (SAssign {}) -- c == Assign x a 
+  (SAssign {}) -- c1 = c2 = Skip, s1 = s2 = asgn x a s     
+  = () 
+
+lem_ss_det c s c1 s1 c2 s2 
+  (SSeq1 {}) -- c == SKIP; c' 
+  (SSeq1 {}) -- c1 = c2 = c', s1 = s2 = s
+  = () 
+
+lem_ss_det c s c1 s1 c2 s2 
+  (SSeq1 {})                             -- c == SKIP; FOO 
+  (SSeq2 cA cA' _FOO _s _s2 cA_s_cA'_s2) -- c == cA  ; FOO 
+  = impossible ("really" ? lem_not_skip cA cA' s _s2 cA_s_cA'_s2)
+
+lem_ss_det c s c1 s1 c2 s2 
+  (SSeq2 cA cA' _FOO _s _s2 cA_s_cA'_s2) -- c == SKIP ; FOO
+  (SSeq1 {}) -- c == SKIP; FOO 
+  = lem_not_skip cA cA' s _s2 cA_s_cA'_s2 
+
+
+lem_ss_det c s c1 s1 c2 s2 
+  (SSeq2 cA cA'  cB _ _s1 cA_s_cA'_s1)  
+  (SSeq2 _  cA'' _  _ _s2 cA_s_cA''_s2)
+  -- c == cA  ; cB 
+  -- c1 == cA' ; CB     
+  -- c2 == cA''; CB     
+  -- cA_s_cA'_s1  
+  -- cA_s_cA''_s2 
+  = lem_ss_det cA s cA' s1 cA'' s2 cA_s_cA'_s1  cA_s_cA''_s2  --  cA' = cA'' && s1 = s2                                  
+
+lem_ss_det c s c1 s1 c2 s2 
+  (SIfF {}) 
+  (SIfF {}) 
+  = ()
+
+lem_ss_det c s c1 s1 c2 s2 
+  (SIfT {}) 
+  (SIfT {}) 
+  = ()
+
+lem_ss_det c s c1 s1 c2 s2 
+  (SWhileT {}) 
+  (SWhileT {}) 
+  = ()
+
+lem_ss_det c s c1 s1 c2 s2 
+  (SWhileF {}) 
+  (SWhileF {}) 
+  = ()
+
+
+{-@ lem_michael :: c:_ -> s:_ -> s':_
+      -> Prop (SStep c s Skip s')
+      -> Prop (BStep c s s')
+  @-}
+lem_michael :: Com -> State -> State -> SStepProof -> BStep
+lem_michael c s s' (SAssign x a _ ) 
+  -- c  == Assign x a 
+  -- s' == asgn x a s
+  = BAssign x a s -- Prop (BStep (Assign x a) s s')
+lem_michael c s s' c_s_skip_s' = undefined
+
+
+
+
+
 
 
 
