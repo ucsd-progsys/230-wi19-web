@@ -414,7 +414,4 @@ The line can be read explicitly as:
 
 Stepping c1 in s gives s1, and stepping (Seq c2 c3) in s1 gives s3. The proof bs1 is given to us in the input, which we already discussed:
 stepping c in _ will give s1. the second proof is given explicitly: stepping c2 in s1 gives s2, stepping c3 in s2 gives s3, using the inductive 
-proofs bs2 and bs3 already given to us. 
- 
-The induction comes from fact that we defined bs1, bs2, and bs3 as axiomatic preconditions that can help prove the input, and we used the 
-same proofs (given they held in the input proof) to prove the output.
+proofs bs2 and bs3 already given to us.
