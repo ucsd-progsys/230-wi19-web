@@ -61,14 +61,17 @@ There is **no text** for CSE 230, but we will be basing much of the material on:
 | 4.   | Induction on Evidence   | [lhs](src/Week4) | Ch4 of Nipkow & Klein                    |
 |      |                         |                  |                                          |
 |      | **Proofs for Programs** |                  |                                          |
-| 5.   | Operational Semantics   | [lhs](src/Week5) | Ch7 of Nipkow & Klein                    |
-| 6.   | Axiomatic Semantics     |                  |                                          |
-| 7.   | Type Systems            |                  |                                          |
+| 5.   | Big Step Semantics      | [lhs](src/Week5) | Ch7 of Nipkow & Klein                    |
+| 6.   |                         | [lhs](src/Week6) |                                          |
+| 7.   | Small Step Semantics    | [lhs](src/Week7) |                                          |
+| 8.   |                         | [lhs](src/Week8) |                                          |
+| 9.   | Axiomatic Semantics     | [lhs](src/Week9) |                                          |
+| 10.  | Type Systems            | [lhs](src/Week10)| 					       |
 |      |                         |                  |                                          |
 |      | **Proofs by Programs**  |                  |                                          |
-| 8.   | Horn Clauses            |                  |                                          |
-| 9.   | Abstract Interpretation |                  |                                          |
-| 10.  | Refinement Types        |                  |                                          |
+|      | Horn Clauses            |                  |                                          |
+|      | Abstract Interpretation |                  |                                          |
+|      | Refinement Types        |                  |                                          |
 |      |                         |                  |                                          |
 
 ## Grading
