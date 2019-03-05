@@ -179,6 +179,7 @@ lem_michael c s s' (SAssign x a _ )
   -- c  == Assign x a 
   -- s' == asgn x a s
   = BAssign x a s -- Prop (BStep (Assign x a) s s')
+
 lem_michael c s s' c_s_skip_s' = undefined
 
 
