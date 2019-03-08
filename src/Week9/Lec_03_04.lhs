@@ -1,30 +1,4 @@
 
-Lem_sstep_bstep :: Com -> State -> State -> SStepsProof -> BStep
-Lem_sstep_bstep c s s’ (Refl {}) = BSkip s
-Lem_sstep_bstep (Assign {}) s s’ (Edge _ _ c2 _s2 _ _ (SAssign x a _) (Refl {})) ← Refl goes here because we are allowed to assume the program path is size 1,
-
-= BAssign x a s
-
-           Bval b s = True    BStep (cThen s s’)
-       ---------------------------------------- BIfT
-          BStep (If b cThen cElse) s s’
-
-
-Lem_sstep_bstep (If b cThen cElse) s s’ (Edge _ _ _cThen _s2 _ _ (SIfT {}) c2s2_c3s3)
-    -- c2s2_c3s3 :: lem_sstep_bstep cThen s s’ c2s2_c3s3 is a proof that (BStep cThen s s’)
-= BifT b cThen cElse s s’ (lem_sstep_bstep cThen s s’ c2s2_c3s3)
-
-What are we actually doing induction on? The path. Notice that the whileT makes the program get “bigger”, so we cannot do induction on the program size. This makes sense, program termination is built in to these SStepsProof objects, as they are finite data structures.
-
-Lem_bstep_sstep :; Com -> State -> State -> BStep -> SStepsProof
-
-
-
-
-
-Recall we have been connecting small-step and big-step semantics:
-(c,s) -> … -> (Skip, s’) implies BigStep(c,s,s’)
-
 Last lecture, we outlined some proofs talking about one small step at a time.
 
 {-@ lem_michael :: c:_ -> s:_ -> s':_ -> Prop (SStep c s Skip s') -> Prop (BStep c s s') @-}
@@ -46,6 +20,7 @@ lem_michael c s s' (SSeq2 {})  -- :: SStep (c1; c2) s (c1'; c2) s'
 -- Should be impossible because we require it to step to skip and sseq2 doesn't step us to SKIP
   = impossible "seq-is-not-skip"
 
+Let's generalize this lemma to talk about more steps.
 
 {-
 In SWhileF we can transition to a skip
@@ -109,6 +84,23 @@ lem_sstep_bstep :: Com -> State -> State -> SStepsProof -> BStep
 -- base state is c is SKIP which corresponds to Refl
 
 lem_sstep_bstep c s s' (Refl {}) = BSkip s
+
+lem_sstep_bstep :: Com -> State -> State -> SStepsProof -> BStep
+lem_sstep_bstep c s s’ (Refl {}) = BSkip s
+lem_sstep_bstep (Assign {}) s s’ (Edge _ _ c2 _s2 _ _ (SAssign x a _) (Refl {})) ← Refl goes here because we are allowed to assume the program path is size 1,
+
+= BAssign x a s
+
+           Bval b s = True    BStep (cThen s s’)
+       ---------------------------------------- BIfT
+          BStep (If b cThen cElse) s s’
+
+
+lem_sstep_bstep (If b cThen cElse) s s’ (Edge _ _ _cThen _s2 _ _ (SIfT {}) c2s2_c3s3)
+    -- c2s2_c3s3 :: lem_sstep_bstep cThen s s’ c2s2_c3s3 is a proof that (BStep cThen s s’)
+= BifT b cThen cElse s s’ (lem_sstep_bstep cThen s s’ c2s2_c3s3)
+
+
 lem_sstep_bstep c s s' (Edge _c s _c2 _s2 _skip _ c1s1_c2s2 {- (c1, s1) -> (c2, s2) -} c2s2_c3s3 {- (c2, s2) ->* (c3, s3) -}) =
                        -- presumably use induction on c2s2_c3s3
                        -- but we're stuck: who do we case split on?
@@ -154,6 +146,7 @@ Quiz:
 Looks like command is smaller. But in WhileT case the command doesn't get smaller
 In this case While b c -> c; While b c which is not structurally smaller?
 
+What are we actually doing induction on? The path. Notice that the whileT makes the program get “bigger”, so we cannot do induction on the program size. This makes sense, program termination is built in to these SStepsProof objects, as they are finite data structures.
 So what is getting smaller?
 The path is getting smaller. SSteps can only encode finite sequences of reductions. This is encoded in the statement because we -->* (Skip, s')
 So we are doing induction on the length of -->*
