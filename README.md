@@ -63,9 +63,9 @@ There is **no text** for CSE 230, but we will be basing much of the material on:
 |      | **Proofs for Programs** |                  |                                          |
 | 5.   | Big Step Semantics      | [lhs](src/Week5) | Ch7 of Nipkow & Klein                    |
 | 6.   |                         | [lhs](src/Week6) |                                          |
-| 7.   | Small Step Semantics    | [lhs](src/Week7) |                                          |
+| 7.   | Small Step Semantics    | [lhs](src/Week7) | [pdf](static/img/smallstep.pdf)          |
 | 8.   |                         | [lhs](src/Week8) |                                          |
-| 9.   | Axiomatic Semantics     | [lhs](src/Week9) |                                          |
+| 9.   | Axiomatic Semantics     | [lhs](src/Week9) | [pdf](static/img/axiomatic.pdf)          |
 | 10.  | Type Systems            | [lhs](src/Week10)| 					       |
 |      |                         |                  |                                          |
 |      | **Proofs by Programs**  |                  |                                          |
