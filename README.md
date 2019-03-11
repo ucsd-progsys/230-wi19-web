@@ -66,8 +66,9 @@ There is **no text** for CSE 230, but we will be basing much of the material on:
 | 7.   | Small Step Semantics    | [lhs](src/Week7) | [pdf](static/img/smallstep.pdf)          |
 | 8.   |                         | [lhs](src/Week8) |                                          |
 | 9.   | Axiomatic Semantics     | [lhs](src/Week9) | [pdf](static/img/axiomatic.pdf)          |
-| 10.  | Type Systems            | [lhs](src/Week10)| 					       |
+| 10.  |                         | [lhs](src/Week10)| 					       |
 |      |                         |                  |                                          |
+|      | Type Systems            |                  | 					       |
 |      | **Proofs by Programs**  |                  |                                          |
 |      | Horn Clauses            |                  |                                          |
 |      | Abstract Interpretation |                  |                                          |
