@@ -85,25 +85,25 @@ lem_sstep_bstep :: Com -> State -> State -> SStepsProof -> BStep
 \end{code}
 
 -- ^ what do we do the induction on?
--- base state is c is SKIP which corresponds to Refl
+The base case is $c = \mathtt{Skip}$ correspinding to $\mathtt{Refl}$
 
+\begin{code}
 lem_sstep_bstep c s s' (Refl {}) = BSkip s
+\end{code}
 
-lem_sstep_bstep :: Com -> State -> State -> SStepsProof -> BStep
-lem_sstep_bstep c s s' (Refl {}) = BSkip s
-lem_sstep_bstep (Assign {}) s s' (Edge _ _ c2 _s2 _ _ (SAssign x a _) (Refl {})) ← Refl goes here because we are allowed to assume the program path is size 1,
+\begin{code}
+lem_sstep_bstep c s s' (Edge _c s _c2 _s2 _skip _ c1s1_c2s2 c2s2_c3s3) =
+\end{code}
 
-= BAssign x a s
+\begin{code}
+lem_sstep_bstep c s s' (Edge _c s _c2 _s2 _skip _ (SAssign x a _) c2s2_c3s3) =
 
-           Bval b s = True    BStep (cThen s s')
-       ---------------------------------------- BIfT
-          BStep (If b cThen cElse) s s'
+lem_sstep_bstep (Assign {}) s s' (Edge _ _ c2 _s2 _ _ (SAssign x a _) (Refl {}))
+  = BAssign x a s
+\end{code}
 
-
-lem_sstep_bstep (If b cThen cElse) s s' (Edge _ _ _cThen _s2 _ _ (SIfT {}) c2s2_c3s3)
-    -- c2s2_c3s3 :: lem_sstep_bstep cThen s s' c2s2_c3s3 is a proof that (BStep cThen s s')
-= BifT b cThen cElse s s' (lem_sstep_bstep cThen s s' c2s2_c3s3)
-
+NOTE TO JACOB: What's above and below this need to get merged. The lem_sstep_bstep (Assign {}) ... above this are what the proof should be.
+               Below is my narration and poorly written version (up until the -- need to case split ...).
 
 lem_sstep_bstep c s s' (Edge _c s _c2 _s2 _skip _ c1s1_c2s2 {- (c1, s1) -> (c2, s2) -} c2s2_c3s3 {- (c2, s2) ->* (c3, s3) -}) =
                        -- presumably use induction on c2s2_c3s3
@@ -119,7 +119,20 @@ lem_sstep_bstep c s s' (Edge _c s _c2 _s2 _skip _ c1s1_c2s2 {- (c1, s1) -> (c2, 
       BAssign x a s -- this failed. Why? Doesn't know that s' = s3
                     -- need to case split on c2s2_c3s3 to show LH that it's Refl
 
-  -- TODO: make this above case into a single top level match
+The two $\mathtt{If}$ cases are similar.
+
+\begin{code}
+{-
+    Bval b s = True    BStep (cThen s s')
+---------------------------------------- BIfT
+     BStep (If b cThen cElse) s s'
+-}
+
+lem_sstep_bstep (If b cThen cElse) s s' (Edge _ _ _cThen _s2 _ _ (SIfT {}) c2s2_c3s3)
+  -- lem_sstep_bstep cThen s s' c2s2_c3s3 is a proof that (BStep cThen s s')
+  = BifT b cThen cElse s s' (lem_sstep_bstep cThen s s' c2s2_c3s3)
+\end{code}
+
 
 lem_sstep_bstep (If b cThen cElse) s s' (Edge _ _ _cThen _ _ _ (SIfT {}) c2s2_c3s3) =
   -- lem_sstep_bstep cThen s s' c2s2_c3s3 :: Prop (BStep cThen s s')
