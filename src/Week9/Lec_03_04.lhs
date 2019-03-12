@@ -84,95 +84,43 @@ Our theorem that small step semantics are equivalent to big step semantics then 
 lem_sstep_bstep :: Com -> State -> State -> SStepsProof -> BStep
 \end{code}
 
--- ^ what do we do the induction on?
-The base case is $c = \mathtt{Skip}$ correspinding to $\mathtt{Refl}$
+-- ^ What do we do the induction on? Answer: the path---it's the only thing that
+gets shorter (recall WHILE loops). Paths are defined inductively, and the only
+thing we can case on is the FIRST step (look at definition of path).
+The base case is $c = \mathtt{Skip}$ corresponding to $\mathtt{Refl}$
 
 \begin{code}
 lem_sstep_bstep c s s' (Refl {}) = BSkip s
 \end{code}
 
+These are some of the inductive cases. Notice the cases on the Edge's
+parameters.
 \begin{code}
-lem_sstep_bstep c s s' (Edge _c s _c2 _s2 _skip _ c1s1_c2s2 c2s2_c3s3) =
-\end{code}
-
-\begin{code}
-lem_sstep_bstep c s s' (Edge _c s _c2 _s2 _skip _ (SAssign x a _) c2s2_c3s3) =
-
 lem_sstep_bstep (Assign {}) s s' (Edge _ _ c2 _s2 _ _ (SAssign x a _) (Refl {}))
   = BAssign x a s
 \end{code}
 
-NOTE TO JACOB: What's above and below this need to get merged. The lem_sstep_bstep (Assign {}) ... above this are what the proof should be.
-               Below is my narration and poorly written version (up until the -- need to case split ...).
-
-lem_sstep_bstep c s s' (Edge _c s _c2 _s2 _skip _ c1s1_c2s2 {- (c1, s1) -> (c2, s2) -} c2s2_c3s3 {- (c2, s2) ->* (c3, s3) -}) =
-                       -- presumably use induction on c2s2_c3s3
-                       -- but we're stuck: who do we case split on?
-                       -- Student Idea: split on SStep of c1s1_c2s2
-                       -- let's try:
-  case c1s1_c2s2 of
-    (SAssign x a _) ->
-      -- c = Assign x a
-      -- what must c2 be? c2 = Skip
-      -- what must s2 be? s2 = asgn x a s
-      -- need to construct: Prop (BStep (Assign x a) s s')
-      BAssign x a s -- this failed. Why? Doesn't know that s' = s3
-                    -- need to case split on c2s2_c3s3 to show LH that it's Refl
-
 The two $\mathtt{If}$ cases are similar.
+Here are the big step semantics for an If:
 
-\begin{code}
-{-
     Bval b s = True    BStep (cThen s s')
 ---------------------------------------- BIfT
      BStep (If b cThen cElse) s s'
--}
+\begin{code}
 
 lem_sstep_bstep (If b cThen cElse) s s' (Edge _ _ _cThen _s2 _ _ (SIfT {}) c2s2_c3s3)
   -- lem_sstep_bstep cThen s s' c2s2_c3s3 is a proof that (BStep cThen s s')
   = BifT b cThen cElse s s' (lem_sstep_bstep cThen s s' c2s2_c3s3)
 \end{code}
 
-
-lem_sstep_bstep (If b cThen cElse) s s' (Edge _ _ _cThen _ _ _ (SIfT {}) c2s2_c3s3) =
-  -- lem_sstep_bstep cThen s s' c2s2_c3s3 :: Prop (BStep cThen s s')
-  -- want Prop (BStep (If b cThen cElse) s s')
-  = BIfT b cThen cElse s s' (lem_sstep_bstep cThen s s' c2s2_c3s3)
-  {-
-  bval b s = True   BStep cThen s s' <--- from the recursive call
-  ----------------------------------- BIfT
-  BStep (If b cThen cElse) s s'
-  -}
-
--- IfF basically the same
-lem_sstep_bstep (If b cThen cElse) s s' (Edge _ _ _cThen _ _ _ (SIfF {}) c2s2_c3s3) =
+IfF basically the same
+\begin{code}
+lem_sstep_bstep (If b cThen cElse) s s' (Edge _ _ _cThen _ _ _ (SIfF {}) c2s2_c3s3)
   = BIfF b cThen cElse s s' (lem_sstep_bstep cElse s s' c2s2_c3s3)
+\end{code}
 
-{-
-So what are we actually doing induction on?
-Trying to prove:
-If (c, s) -->* (SKIP, s'),
-then BStep c s s'
-Which object are we doing induction on?
-Student thought: doing induction on c because each step c gets smaller
-How to answer question: Which thing are we doing recursive call on? Which thing is getting smaller?
-Quiz:
-1. Command is getting smaller
-2. Something else is getting smaller
-
-Looks like command is smaller. But in WhileT case the command doesn't get smaller
-In this case While b c -> c; While b c which is not structurally smaller?
-
-What are we actually doing induction on? The path. Notice that the whileT makes the program get ``bigger'', so we cannot do induction on the program size. This makes sense, program termination is built in to these SStepsProof objects, as they are finite data structures.
-So what is getting smaller?
-The path is getting smaller. SSteps can only encode finite sequences of reductions. This is encoded in the statement because we -->* (Skip, s')
-So we are doing induction on the length of -->*
--}
-
--- Similarly, the other direction
+-- Similarly, we can prove the other direction; that bigstep implies smallstep.
 {-@ lem_bstep_sstep :: c:_ -> s:_ -> s':_ -> Prop (BStep c s s') -> Prop (SSteps c s Skip s') @-}
 lem_bstep_sstep :: Com -> State -> State -> BStep -> SStepsProof
   lem_bstep_sstep = undefined
-
-
 
