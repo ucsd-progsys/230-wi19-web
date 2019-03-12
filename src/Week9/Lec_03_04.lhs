@@ -1,45 +1,52 @@
+\begin{code}
+{-@ LIQUID "--reflection"  @-}
+{-@ LIQUID "--ple"         @-}
+{-@ LIQUID "--short-names" @-}
+
+import Prelude hiding ((++)) 
+import ProofCombinators
+import BigStep
+import SmallStep
+\end{code}
 
 Last lecture, we outlined some proofs talking about one small step at a time.
 
+\begin{code}
 {-@ lem_michael :: c:_ -> s:_ -> s':_ -> Prop (SStep c s Skip s') -> Prop (BStep c s s') @-}
 
-lem_michael :: c:Com -> s:State -> s’State -> pf:SStepProof -> BStep
-“If (c,s) → (skip, s’) then BigStep c s s’ ”
+lem_michael :: c:Com -> s:State -> s': State -> pf:SStepProof -> BStep
+\end{code}
 
--- Case holds easily
-lem_michael c s s' (SSeq1 {})
--- c = SKIP; c1
--- c' = SKIP <--- final state
--- c1 = SKIP
-  = -- :: must produce prop that Bigstep seq of skip skip starting in s goes to s
-  -- have to apply BSeq rule multiple times
+\begin{lemma}
+  If $(c, s) \leadsto (\mathtt{Skip}, s')$, then $\mathtt{BigStep } c s s'
+\end{lemma}
 
-lem_michael c s s' (SSeq2 {})  -- :: SStep (c1; c2) s (c1'; c2) s'
--- c = c1; c2
--- c' = SKIP <--- final state
--- Should be impossible because we require it to step to skip and sseq2 doesn't step us to SKIP
+We look at two cases. The first, for the rule $\mathtt{SSeq1}$ holds easily
+as $(\mathtt{Skip}; c1, s) \leadsto (\mathtt{Skip}, s')$ means that c1 must be $\mathtt{Skip}$.
+
+The second, for the rule $\mathtt{SSeq2}$ is impossible. $\mathtt{SSeq2}$ only steps the first argument but remains a sequence.
+
+\begin{code}
+lem_michael c s s' (SSeq2 {})
   = impossible "seq-is-not-skip"
+\end{code}
 
-Let's generalize this lemma to talk about more steps.
+Then we generalize this lemma to talk about more steps.
+We want to be able to talk about take more than one small step.
+In fact we want to talk about 0 or more steps.
+We will then show that that is equivalent to the big step semantics.
+So the theorem we want to prove is
+\begin{theorem}
+  If $(c, s) \leadsto_{\text{0 or more}} (\mathtt{Skip}, s')$, then $\mathtt{BigStep } c s s'$.
+\end{theorem}
+So how do we write this "0 or more"?
+Answer: It looks a lot like paths from earlier homework.
+"node" from the homework corresponds to $(c, s)$.
+"edge" from the homework corresponds to $(c, s) \leadsto (c', s')$.
 
-{-
-In SWhileF we can transition to a skip
-in SWhileT we don't sstep to a skip
-have to handle the two if rules if left or right branch is a skip
--}
+We now define $\mathtt{SSteps}$ which we write $\leadsto^*$.
 
-{-
-how do we talk about sstepping zero or many times and that's equal to big step
-
-if (c, s) ~>(0 or more) (SKIP, s'), then BSTEP c s s'
-How do we write down "0 or more"
-This looks like paths from earlier homework.
-earlier "node" corresponds to (c, s)
-earlier "edge" corresponds to (c, s) ~> (c', s')
-
-Let's look how we defined this:
--}
-
+\begin{code}
 -- Proposition for the reflexive, transitive closure of sstep
 data SStepsProp where
   SSteps :: Com -> State -> Com -> State -> SStepsProp
@@ -56,29 +63,26 @@ data SStepsProof where
           -> Prop (SSteps c2 s2 c3 s3) -- path-from c2-s2 to c3-s3
           -> Prop (SSteps c1 s1 c3 s3) -- path-from c1-s1 to c3-s3
 @-}
-  -- ^ if I go from (c, s) ~> (c', s') ~>* (c'', s'')
-  -- then (c, s) ~>* (c'', s'')
-
-                --------------
-                (c,s) -> (c,s)
-
-Type: Com->State->SStepsProof
-
-               (c,s) -> (c’,s’)     (c’,s’) ->* (c’’, s’’)
-              --------------------------------------------
-                        (c,s) ->* (c’’,s’’) 
-
-type: Com->State->Com->State->Com->State->SStepProof->SStepProof
-->SStepsProof
-
 
 {-
-Theorem that small step is equivalent to big step:
-If (c, s) -->* (SKIP, s'),
-then BStep c s s'
+ --------------[Refl]
+ (c,s) ~> (c,s)
+
+(c,s) ~> (c',s')     (c',s') ~>* (c'', s'')
+--------------------------------------------[Edge]
+        (c,s) ~>* (c'',s'')
 -}
+\end{code}
+
+Our theorem that small step semantics are equivalent to big step semantics then becomes
+\begin{theorem}
+  If $(c, s) \leadsto^{*} (\mathtt{Skip}, s')$, then $\mathtt{BigStep } c s s'$.
+\end{theorem}
+
+\begin{code}
 {-@ lem_sstep_bstep :: c:_ -> s:_ -> s':_ -> Prop (SSteps c s Skip s') -> Prop (BStep c s s') @-}
 lem_sstep_bstep :: Com -> State -> State -> SStepsProof -> BStep
+\end{code}
 
 -- ^ what do we do the induction on?
 -- base state is c is SKIP which corresponds to Refl
@@ -86,19 +90,19 @@ lem_sstep_bstep :: Com -> State -> State -> SStepsProof -> BStep
 lem_sstep_bstep c s s' (Refl {}) = BSkip s
 
 lem_sstep_bstep :: Com -> State -> State -> SStepsProof -> BStep
-lem_sstep_bstep c s s’ (Refl {}) = BSkip s
-lem_sstep_bstep (Assign {}) s s’ (Edge _ _ c2 _s2 _ _ (SAssign x a _) (Refl {})) ← Refl goes here because we are allowed to assume the program path is size 1,
+lem_sstep_bstep c s s' (Refl {}) = BSkip s
+lem_sstep_bstep (Assign {}) s s' (Edge _ _ c2 _s2 _ _ (SAssign x a _) (Refl {})) ← Refl goes here because we are allowed to assume the program path is size 1,
 
 = BAssign x a s
 
-           Bval b s = True    BStep (cThen s s’)
+           Bval b s = True    BStep (cThen s s')
        ---------------------------------------- BIfT
-          BStep (If b cThen cElse) s s’
+          BStep (If b cThen cElse) s s'
 
 
-lem_sstep_bstep (If b cThen cElse) s s’ (Edge _ _ _cThen _s2 _ _ (SIfT {}) c2s2_c3s3)
-    -- c2s2_c3s3 :: lem_sstep_bstep cThen s s’ c2s2_c3s3 is a proof that (BStep cThen s s’)
-= BifT b cThen cElse s s’ (lem_sstep_bstep cThen s s’ c2s2_c3s3)
+lem_sstep_bstep (If b cThen cElse) s s' (Edge _ _ _cThen _s2 _ _ (SIfT {}) c2s2_c3s3)
+    -- c2s2_c3s3 :: lem_sstep_bstep cThen s s' c2s2_c3s3 is a proof that (BStep cThen s s')
+= BifT b cThen cElse s s' (lem_sstep_bstep cThen s s' c2s2_c3s3)
 
 
 lem_sstep_bstep c s s' (Edge _c s _c2 _s2 _skip _ c1s1_c2s2 {- (c1, s1) -> (c2, s2) -} c2s2_c3s3 {- (c2, s2) ->* (c3, s3) -}) =
@@ -146,7 +150,7 @@ Quiz:
 Looks like command is smaller. But in WhileT case the command doesn't get smaller
 In this case While b c -> c; While b c which is not structurally smaller?
 
-What are we actually doing induction on? The path. Notice that the whileT makes the program get “bigger”, so we cannot do induction on the program size. This makes sense, program termination is built in to these SStepsProof objects, as they are finite data structures.
+What are we actually doing induction on? The path. Notice that the whileT makes the program get ``bigger'', so we cannot do induction on the program size. This makes sense, program termination is built in to these SStepsProof objects, as they are finite data structures.
 So what is getting smaller?
 The path is getting smaller. SSteps can only encode finite sequences of reductions. This is encoded in the statement because we -->* (Skip, s')
 So we are doing induction on the length of -->*
