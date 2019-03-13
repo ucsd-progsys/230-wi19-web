@@ -131,20 +131,6 @@ bx2 _ = verify p c q (\_ -> ())
     q =      (V "x" `Equal` V "b")                -- { x = a && y = b } 
       `bAnd` (V "y" `Equal` V "a") 
 
--------------------------------------------------------------------------------
--- | Example 3: Absolute value 
--------------------------------------------------------------------------------
-
-{- 
-    { true }
-            if (0 <= x) then 
-                res = x 
-            else 
-                res = 0 - x 
-    { x <= res && 0 <= res }
-
- -}
-
 
 -------------------------------------------------------------------------------
 -- | Example 4: Reduce to Zero  
@@ -161,47 +147,4 @@ bx4 _ = verify p c q (\_ -> ())
 
 
 
-{- Example 5 : Slow Subtraction 
 
-   {{ X = m ∧ Y = n }}
-     WHILE X ≠ 0 DO
-       Y ::= Y - 1;
-       X ::= X - 1
-     END
-   {{ Y = n - m }} 
--}
-
-{- Example 6: Slow Addition 
-
-  WHILE X ≠ 0 DO
-     Z ::= Z + 1;
-     X ::= X - 1
-  END
- -} 
-
-{- Example 7: Summation 
-
-   { TRUE }
-   i ::= 0;
-   r ::= 0;
-   WHILE  (i <= n)   
-     @{ 0 <= i && 2*r = i * (i+1) }
-     r ::= r + i;
-     i ::= i + 1
-   END
-   { 2*r == n*(n+1) } 
-
--} 
-
-{- Example 8: SQUARING
-
- {{ X = m }}
- Y ::= 0;
- Z ::= 0;
- WHILE  Y  ≠  X  DO
-   Z ::= Z + X;
-   Y ::= Y + 1
- END
-   { Z = m * m } 
-
- -}
