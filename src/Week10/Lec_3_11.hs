@@ -153,7 +153,7 @@ leg5 s s' _ = ()
 
 
 --------------------------------------------------------------------------------
--- | Two simple facts about Floyd-Hoare Triples --------------------------------
+-- | 1. Simple facts about Floyd-Hoare Triples --------------------------------
 --------------------------------------------------------------------------------
 
 {-@ lem_post_true :: p:_ -> c:_ -> Legit p c tt @-}
@@ -164,8 +164,68 @@ lem_post_true p c = \s s' c_s_s' -> ()
 lem_pre_false :: Com -> Assertion -> Legit 
 lem_pre_false c q = \s s' c_s_s' -> () 
 
+--------------------------------------------------------------------------------
+-- | 2. Validity and Implication
+--------------------------------------------------------------------------------
 
--- | Assignment 
+{-@ type Valid P = s:State -> { v: Proof | bval P s } @-}
+type Valid = State -> Proof 
+
+{-@ type Imply P Q = Valid (bImp P Q) @-}
+
+-- 10 <= x  => 5 <= x 
+{-@ v1 :: _ -> Imply (Leq (N 10) (V {"x"})) (Leq (N 5) (V {"x"})) @-} 
+v1 :: a -> Valid 
+v1 _ = \_ -> ()
+
+-- (0 < x && 0 < y) ===> (0 < x + y)
+
+{-@ v2 :: _ -> Imply (bAnd (Leq (N 0) (V {"x"})) (Leq (N 0) (V {"y"}))) 
+                     (Leq (N 0) (Plus (V {"x"}) (V {"y"})))
+  @-}             
+v2 :: a -> Valid 
+v2 _ = \_ -> ()
+
+--------------------------------------------------------------------------------
+-- | 3. Consequence
+--------------------------------------------------------------------------------
+{-@ lem_conseq_pre :: p':_ -> p:_ -> q:_ -> c:_ 
+                   -> Imply p' p -> Legit p c q 
+                   -> Legit p' c q
+  @-}
+lem_conseq_pre :: Assertion -> Assertion -> Assertion -> Com -> Valid -> Legit -> Legit 
+lem_conseq_pre p' p q c impl pcq = \s s' c_s_s' -> pcq (s ? (impl s)) s' c_s_s'
+
+{-@ lem_conseq_post :: p:_ -> q:_ -> q':_ -> c:_ 
+                    -> Legit p c q -> Imply q q' 
+                    -> Legit p c q'
+  @-}
+lem_conseq_post :: Assertion -> Assertion -> Assertion -> Com -> Legit -> Valid -> Legit 
+lem_conseq_post p q q' c pcq impl = \s s' c_s_s' -> pcq s s' c_s_s' ? (impl s') 
+
+--------------------------------------------------------------------------------
+-- | 4. Skip 
+--------------------------------------------------------------------------------
+-- {P} Skip {P}
+
+{-@ lem_skip :: p:_ -> (Legit p Skip p) @-}
+lem_skip :: Assertion -> Legit 
+lem_skip p = \s s' (BSkip {}) -> () 
+
+
+{- | Exercise suppose you have 
+
+      {P} Skip {Q} 
+
+   Prove that 
+
+      P => Q 
+
+ -}
+
+--------------------------------------------------------------------------------
+-- | 5. Assignment 
+--------------------------------------------------------------------------------
 
 --  { Y = 1     }  X <~ Y      { X = 1 }
 
@@ -211,47 +271,50 @@ lem_pre_false c q = \s s' c_s_s' -> ()
 
   -} 
 
---------------------------------------------------------------------------------
--- | `Valid`ity of an assertion
---------------------------------------------------------------------------------
+{-@ lem_asgn :: x:_ -> a:_ -> q:_ -> 
+      Legit (bsubst x a q) (Assign x a) q 
+  @-}
+lem_asgn :: Vname -> AExp -> Assertion -> Legit 
+lem_asgn x a q = \s s' (BAssign {}) -> lem_bsubst x a q s
 
-
--- forall s. bval P s == True 
-{-@ type Valid P = s:State -> { v: Proof | bval P s } @-}
-type Valid = State -> Proof 
-
--- x >= 0 || x < 0
-
-{-@ checkValid :: p:_ -> Valid p -> () @-}
-checkValid :: Assertion -> Valid -> ()
-checkValid p v = () 
-
--- x <= 0 
-ex0 = checkValid (e0 `bImp` e1) (\_ -> ())
-  where 
-    e0 = (V "x") `Leq` (N 0)
-    e1 = ((V "x") `Minus` (N 1)) `Leq` (N 0)
-
--- x <= 0 => x - 1 <= 0
--- e1 = e0 `bImp` ((V "x" `Minus` N 1) `Leq` (N 0))
 
 --------------------------------------------------------------------------------
--- | When does an assertion `Imply` another
+-- | 6. Sequencing 
 --------------------------------------------------------------------------------
+{-@ lem_seq :: c1:_ -> c2:_ -> p:_ -> q:_ -> r:_ 
+            -> Legit p c1 q -> Legit q c2 r 
+            -> Legit p (Seq c1 c2) r 
+  @-}
+lem_seq :: Com -> Com -> Assertion -> Assertion -> Assertion -> Legit -> Legit -> Legit 
+lem_seq c1 c2 p q r l1 l2 = \s s' (BSeq _ _ _ smid _ t1 t2) -> 
+  l1 s smid t1 &&& l2 smid s' t2 
 
-{-@ type Imply P Q = Valid (bImp P Q) @-}
 
--- 10 <= x => 5 <= x
-{-@ v1 :: _ -> Imply (Leq (N 10) (V {"x"})) (Leq (N 5) (V {"x"})) @-} 
-v1 :: a -> Valid 
-v1 _ = \_ -> ()
+--------------------------------------------------------------------------------
+-- | 7. Branches 
+--------------------------------------------------------------------------------
+{-@ lem_if :: b:_ -> c1:_ -> c2:_ -> p:_ -> q:_ 
+           -> Legit (bAnd p b)       c1 q 
+           -> Legit (bAnd p (Not b)) c2 q 
+           -> Legit p (If b c1 c2)  q
+  @-}
+lem_if :: BExp -> Com -> Com -> Assertion -> Assertion -> Legit -> Legit -> Legit
+lem_if b c1 c2 p q l1 l2 = \s s' bs -> case bs of 
+  BIfF _ _ _ _ _ c2_s_s' -> l2 s s' c2_s_s'
+  BIfT _ _ _ _ _ c1_s_s' -> l1 s s' c1_s_s'
 
--- (0 < x && 0 < y) ===> (0 < x + y)
-{-@ v2 :: _ -> Imply (bAnd (Leq (N 0) (V {"x"})) (Leq (N 0) (V {"y"}))) 
-                     (Leq (N 0) (Plus (V {"x"}) (V {"y"})))
-  @-}             
-v2 :: a -> Valid 
-v2 _ = \_ -> ()
+--------------------------------------------------------------------------------
+-- | 8. Loops 
+--------------------------------------------------------------------------------
+{-@ lem_while :: b:_ -> c:_ -> p:_ 
+              -> Legit (bAnd p b) c p 
+              -> Legit p (While b c) (bAnd p (Not b)) 
+  @-}
+lem_while :: BExp -> Com -> Assertion -> Legit -> Legit 
+lem_while b c p lbody s s' (BWhileF {}) 
+  = ()
+lem_while b c p lbody s s' (BWhileT _ _ _ smid _ c_s_smid w_smid_s') 
+  = lem_while b c p lbody (smid ? lbody s smid c_s_smid) s' w_smid_s' 
 
 --------------------------------------------------------------------------------
 -- | The Floyd-Hoare proof system
@@ -282,9 +345,9 @@ data FH where
                -> Prop (FH (bAnd p b)       c1 q) 
                -> Prop (FH (bAnd p (Not b)) c2 q)
                -> Prop (FH p (If b c1 c2) q)
-    | FHWhile  :: inv:_ -> b:_ -> c:_
-               -> Prop (FH (bAnd inv b) c inv) 
-               -> Prop (FH inv (While b c) (bAnd inv (Not b)))
+    | FHWhile  :: p:_ -> b:_ -> c:_
+               -> Prop (FH (bAnd p b) c p) 
+               -> Prop (FH p (While b c) (bAnd p (Not b)))
     | FHConPre :: p':_ -> p:_ -> q:_ -> c:_  
                -> Imply p' p
                -> Prop (FH p c q) 
@@ -300,18 +363,23 @@ data FH where
 --------------------------------------------------------------------------------
 -- thm_fh_legit :: p:_ -> c:_ -> q:_ -> Prop (FH p c q) -> Legit p c q
 
--- thm_legit_fh :: p:_ -> c:_ -> q:_ -> Legit p c q -> Prop (FH p c q) 
+
+
+
+
+
+
 
 
 --------------------------------------------------------------------------------
 -- | Making FH Algorithmic: Verification Conditions 
 --------------------------------------------------------------------------------
 data ICom 
-  = ISkip                          -- skip 
-  | IAssign Vname     AExp         -- x := a
-  | ISeq    ICom      ICom         -- c1; c2
-  | IIf     BExp      ICom  ICom   -- if b then c1 else c2
-  | IWhile  Assertion BExp  ICom   -- while {I} b c 
+  = ISkip                      -- skip 
+  | IAssign Vname AExp         -- x := a
+  | ISeq    ICom  ICom         -- c1; c2
+  | IIf     BExp  ICom  ICom   -- if b then c1 else c2
+  | IWhile  BExp  BExp  ICom   -- while {I} b c 
   deriving (Show)
 
 {-@ reflect pre @-}
@@ -322,31 +390,28 @@ pre (ISeq c1 c2)   q = pre c1 (pre c2 q)
 pre (IIf b c1 c2)  q = bIte b (pre c1 q) (pre c2 q) 
 pre (IWhile i _ _) _ = i 
 
-
-
-
 {-@ reflect vc @-}
 vc :: ICom -> Assertion -> Assertion
 vc ISkip          _ = tt 
 vc (IAssign {})   _ = tt 
 vc (ISeq c1 c2)   q = (vc c1 (pre c2 q)) `bAnd` (vc c2 q)
 vc (IIf _ c1 c2)  q = (vc c1 q) `bAnd` (vc c2 q)
-vc (IWhile i b c) q = ((bAnd i b)       `bImp` (pre c i)) `bAnd`   -- { i && b} c { i }
-                      ((bAnd i (Not b)) `bImp` q        ) `bAnd`   -- { i & ~b} => Q 
+vc (IWhile i b c) q = ((bAnd i b)       `bImp` (pre c i)) `bAnd` 
+                      ((bAnd i (Not b)) `bImp` q        ) `bAnd`
                       vc c i
 
-{-@ reflect erase @-}
-erase :: ICom -> Com 
-erase ISkip          = Skip 
-erase (IAssign x a)  = Assign x a 
-erase (ISeq c1 c2)   = Seq (erase c1) (erase c2)
-erase (IIf b c1 c2)  = If b (erase c1) (erase c2)
-erase (IWhile _ b c) = While b (erase c)
+{-@ reflect strip @-}
+strip :: ICom -> Com 
+strip ISkip          = Skip 
+strip (IAssign x a)  = Assign x a 
+strip (ISeq c1 c2)   = Seq (strip c1) (strip c2)
+strip (IIf b c1 c2)  = If b (strip c1) (strip c2)
+strip (IWhile _ b c) = While b (strip c)
 
 -----------------------------------------------------------------------------------
 -- | THEOREM: Soundness of VC
 -----------------------------------------------------------------------------------
--- thm_vc :: c:_ -> q:_ -> Valid (vc c q) -> Legit (pre c q) (erase c) q
+-- thm_vc :: c:_ -> q:_ -> Valid (vc c q) -> Legit (pre c q) (strip c) q
 
 -----------------------------------------------------------------------------------
 -- | Extending the above to triples [HW] 
@@ -359,6 +424,4 @@ vc' p c q = bAnd (bImp p (pre c q)) (vc c q)
 -----------------------------------------------------------------------------------
 -- | THEOREM: Soundness of VC'
 -----------------------------------------------------------------------------------
--- thm_vc' :: p:_ -> c:_ -> q:_ -> Valid (vc' p c q) -> Legit p (erase c) q
-
-
+-- thm_vc' :: p:_ -> c:_ -> q:_ -> Valid (vc' p c q) -> Legit p (strip c) q

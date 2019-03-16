@@ -2,7 +2,7 @@
 {-@ LIQUID "--ple"         @-}
 {-@ LIQUID "--diff"        @-}
 
-module Verifier () where 
+module Lec_3_15 () where 
 
 import           ProofCombinators
 import qualified State as S
@@ -24,16 +24,20 @@ imports = (FH undefined undefined undefined)
 {-@ verify :: p:_ -> c:_ -> q:_ -> Valid (vc' p c q) -> () @-}
 verify :: Assertion -> ICom -> Assertion -> Valid -> () 
 verify _ _ _ _ = () 
-
+{-
 ----------------------------------------------------------------
 ex1   :: () -> ()
 ex1 _ = verify p c q (\_ -> ()) 
   where 
     p = tt                                    -- { true } 
-    c = IAssign "x" (N 5)                     --    x := 5
+    c = IAssign "x" (N 5)                    --    x := 50
     q = Equal (V "x") (N 5)                   -- { x == 5 }
 
+    --        p    => pre c q /\ vc c q
+    -- VC  = (True => 5 = 5) /\ True 
+    -- pre = 50 == 5 
 ----------------------------------------------------------------
+-}
 
 ex2   :: () -> () 
 ex2 _ = verify p c q (\_ -> ()) 
@@ -42,8 +46,12 @@ ex2 _ = verify p c q (\_ -> ())
     c = IAssign "x" (Plus (V "x") (N 1))      --    x := x + 1
     q = Equal (V "x") (N 3)                   -- { x = 3 }
 
+    --        p    => pre c q /\ vc c q
+    -- VC  = (x=2 => x+1=3) /\ True 
+    -- pre = x+1 = 3 
 ----------------------------------------------------------------
 
+{-
 ex2a   :: () -> () 
 ex2a _ = verify p c q (\_ -> ()) 
   where 
@@ -72,15 +80,14 @@ ex5 _ = verify p c q (\_ -> ())
     q = V "x" `Equal` N 0                      -- { x = 0}
 
 ----------------------------------------------------------------
-
+-}
 ex8  :: () -> () 
 ex8 _ = verify p c q (\_ -> ()) 
   where 
     p = tt                                     -- { true } 
     c = IWhile i tt ISkip                      --    WHILE_i true SKIP 
     q = ff                                     -- { false }
-    i = tt -- undefined -- TODO: In class
-
+    i = tt
 ----------------------------------------------------------------
 
 ex9  :: () -> () 
@@ -90,18 +97,27 @@ ex9 _ = verify p c q (\_ -> ())
     c = IWhile i (Leq (V "x") (N 0))           --   WHILE_i (x <= 0) DO
           (IAssign "x" (Plus (V "x") (N 1)))   --     x := x + 1
     q = Equal (V "x") (N 1)                    -- { x = 1 } 
-    i = undefined -- TODO: In class
+    i = bOr p (Equal (V "x") (N 1))
 
+      -- x=0 => (x=0 || x=1)
+      -- {(x=0 || x=1) /\ x <= 0 } x := x+1 {x=0 || x=1}
+      -- (x=0|| x=1) /\ x > 0 => x = 1
 ----------------------------------------------------------------
 ex10  :: () -> () 
 ex10 _ = verify p c q (\_ -> ()) 
   where 
     p = Equal (V "x") (N 1)                    -- { x = 1 } 
-    c = IWhile i (Not (Leq (V "x") (N 0)))     --   WHILE_i not (x <= 0) DO
+    c = IWhile i (Not (Leq (V "x") (N 0)))     --   WHILE (x > 0) DO
           (IAssign "x" (Plus (V "x") (N 1)))   --     x := x + 1
     q = Equal (V "x") (N 100)                  -- { x = 100 } 
     i = undefined -- TODO: In class
 
+    -- P => I 
+    -- {I && b} c { I }
+    -- I && !b => Q 
+        -- x>0 &&& not ( x > 0 ) => Q
+    -- I := x > 0 
+{-
 -------------------------------------------------------------------------------
 -- | Example 1: branching
 -------------------------------------------------------------------------------
@@ -118,6 +134,7 @@ bx1 _ = verify p c q (\_ -> ())
 -------------------------------------------------------------------------------
 -- | Example 2: Swapping Using Addition and Subtraction 
 -------------------------------------------------------------------------------
+-} 
 
 bx2 :: () -> () 
 bx2 _ = verify p c q (\_ -> ()) 
@@ -127,10 +144,13 @@ bx2 _ = verify p c q (\_ -> ())
     c =      IAssign "x" (Plus  (V "x") (V "y"))  --     x := x + y
       `ISeq` IAssign "y" (Minus (V "x") (V "y"))  --     y := x - y
       `ISeq` IAssign "x" (Minus (V "x") (V "y"))  --     x := x - y
-    q =      (V "x" `Equal` V "b")                -- { x = a && y = b } 
+    q =      (V "x" `Equal` V "b")                -- { x = b && y = a } 
       `bAnd` (V "y" `Equal` V "a") 
 
-
+      -- vc' = x=a & y=b => (x+y-(x+y-y) =b && (x+y)-y=a) && true & True & true
+      -- pre = (x+y-(x+y-y) =b && (x+y)-y=a)
+      -- vc  = true & true & true 
+{-
 -------------------------------------------------------------------------------
 -- | Example 4: Reduce to Zero  
 -------------------------------------------------------------------------------
@@ -147,3 +167,4 @@ bx4 _ = verify p c q (\_ -> ())
 
 
 
+-}
