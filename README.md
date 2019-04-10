@@ -75,6 +75,20 @@ There is **no text** for CSE 230, but we will be basing much of the material on:
 |      | Refinement Types        |                  |                                          |
 |      |                         |                  |                                          |
 
+## Piazza
+
+All announcements are on [on Piazza](https://piazza.com/class/jqk23zupq7a62c)
+
+## Assignments 
+
+- [HW1](https://classroom.github.com/a/PQ9R2Yfh) due 1/20
+- [HW2](https://classroom.github.com/a/qcYaxHeJ) due 2/1
+- [HW3](https://classroom.github.com/a/VW5sqKmL) due 2/11
+- [HW4](https://classroom.github.com/a/BiyzylSq) due 2/20
+- [HW5](https://classroom.github.com/a/4LWQx956) due 3/3
+- [HW6](https://classroom.github.com/a/pjo_q4I9) due 3/10
+
+
 ## Grading
 
 ### Class Participation (10%)
