@@ -75,6 +75,10 @@ There is **no text** for CSE 230, but we will be basing much of the material on:
 |      | Refinement Types        |                  |                                          |
 |      |                         |                  |                                          |
 
+## Scribe Notes
+
+- Can be found [here](notes/)
+
 ## Assignments Starter Code
 
 - [HW1](https://github.com/ucsd-cse230-wi19/hw1)
