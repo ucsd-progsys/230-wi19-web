@@ -10,6 +10,8 @@ We stopped last class at **proving something for all n**. The example statement 
 Recall the 'sum' function:
 
 \begin{code}
+module ProofCombinators where
+
 import Prelude hiding (sum)
 {-@ reflect sum @-}                                 
 sum :: Int -> Int 

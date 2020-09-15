@@ -1,9 +1,13 @@
+
+
 Week 2 - Wed
 ============
 
 Remember our `sum` function from last lecture:
 
 \begin{code}
+module EquationalProofs where
+
 import Prelude hiding (sum)
 
 {-@ reflect sum @-}                                 

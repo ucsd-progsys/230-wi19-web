@@ -75,11 +75,21 @@ There is **no text** for CSE 230, but we will be basing much of the material on:
 |      | Refinement Types        |                  |                                          |
 |      |                         |                  |                                          |
 
+## Assignments Starter Code
+
+- [HW1](https://github.com/ucsd-cse230-wi19/hw1)
+- [HW2](https://github.com/ucsd-cse230-wi19/hw2)
+- [HW3](https://github.com/ucsd-cse230-wi19/hw3)
+- [HW4](https://github.com/ucsd-cse230-wi19/hw4)
+- [HW5](https://github.com/ucsd-cse230-wi19/hw5)
+- [HW6](https://github.com/ucsd-cse230-wi19/hw6)
+- [Final](https://github.com/ucsd-cse230-wi19/final)
+
 ## Piazza
 
 All announcements are on [on Piazza](https://piazza.com/class/jqk23zupq7a62c)
 
-## Assignments 
+## Github Assignments 
 
 - [HW1](https://classroom.github.com/a/PQ9R2Yfh) due 1/20
 - [HW2](https://classroom.github.com/a/qcYaxHeJ) due 2/1
@@ -87,6 +97,8 @@ All announcements are on [on Piazza](https://piazza.com/class/jqk23zupq7a62c)
 - [HW4](https://classroom.github.com/a/BiyzylSq) due 2/20
 - [HW5](https://classroom.github.com/a/4LWQx956) due 3/3
 - [HW6](https://classroom.github.com/a/pjo_q4I9) due 3/10
+
+
 
 
 ## Grading

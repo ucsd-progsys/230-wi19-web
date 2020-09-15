@@ -1,3 +1,8 @@
+
+\begin{code}
+module Induction where 
+\end{code}
+
 Friday Jan. 25
 
 In the previous lecture, we solved some very basic theorems like sum of  first n natural numbers with 
