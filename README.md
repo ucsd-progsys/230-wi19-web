@@ -2,6 +2,11 @@
 
 Course materials for UCSD CSE 230, Winter 2019
 
+## Private Links 
+
+- [HW solutions](https://github.com/ucsd-progsys/230-wi19-private)
+- [Concrete-LH](https://github.com/ucsd-progsys/concrete-semantics-lh)
+
 ## Course Description
 
 CSE 230 is an introduction to the Formal Semantics of Programming Languages.
